@@ -5,7 +5,8 @@ describe('Given that loam exists', () => {
         // Nothing
     });
     describe('calling open', function() {
-        this.timeout(4000);
+        // Travis seems to take 7ish seconds
+        this.timeout(15000);
         it('should return a GDALDataset', (done) => {
             let blankFile = new File(
                 [],

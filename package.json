@@ -4,10 +4,11 @@
   "description": "Javascript wrapper for GDAL in the browser",
   "main": "lib/loam.js",
   "scripts": {
-    "build": "webpack --env dev && webpack --env build && npm run test",
+    "build": "webpack --env dev && webpack --env build",
     "dev": "webpack --progress --colors --watch --env dev",
     "test": "karma start --single-run --browser ChromeHeadless karma.conf.js",
-    "test:watch": "karma start --auto-watch --browser ChromeHeadless karma.conf.js"
+    "test:watch": "karma start --auto-watch --browser ChromeHeadless karma.conf.js",
+    "test:ci": "webpack --env dev && webpack --env build && karma start --single-run --browser ChromeHeadless karma.conf.js"
   },
   "repository": {
     "type": "git",
@@ -25,6 +26,9 @@
   "bugs": {
     "url": "https://github.com/azavea/loam/issues"
   },
+  "files": [
+      "lib/"
+  ],
   "homepage": "https://github.com/azavea/loam",
   "devDependencies": {
     "babel-cli": "^6.26.0",
