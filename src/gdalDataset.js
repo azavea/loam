@@ -1,5 +1,5 @@
 export default class GDALDataset {
-    constructor(worker) {
-        this.worker = worker;
+    constructor(datasetPtr) {
+        this.datasetPtr = datasetPtr;
     }
 }
