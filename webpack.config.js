@@ -11,13 +11,16 @@ let plugins = [], outputFile;
 
 if (env === 'build') {
   plugins.push(new UglifyJsPlugin({ minimize: true }));
-  outputFile = libraryName + '.min.js';
+  outputFile = '[name].min.js';
 } else {
-  outputFile = libraryName + '.js';
+  outputFile = '[name].js';
 }
 
 const config = {
-  entry: __dirname + '/src/index.js',
+  entry: {
+      loam: __dirname + '/src/index.js',
+      'loam-worker': __dirname + '/src/worker.js'
+  },
   devtool: 'source-map',
   output: {
     path: __dirname + '/lib',

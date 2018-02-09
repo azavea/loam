@@ -1,19 +1,26 @@
-/* global describe, it, before */
-
-import chai from 'chai';
-import {open, GDALDataset } from '../lib/loam.js';
-
-chai.expect();
-
-const expect = chai.expect;
+/* global describe, it, before, expect */
 
 describe('Given that loam exists', () => {
     before(() => {
         // Nothing
     });
-    describe('calling open', () => {
-        it('should return a GDALDataset', () => {
-            expect(open()).to.be.an.instanceof(GDALDataset);
+    describe('calling open', function() {
+        this.timeout(4000);
+        it('should return a GDALDataset', (done) => {
+            let blankFile = new File(
+                [],
+                'blank.tif',
+                {}
+            );
+            loam.open(blankFile).then(
+                function (ds) {
+                    expect(ds).to.be.an.instanceof(loam.GDALDataset);
+                    done();
+                },
+                function (failure) {
+                    done(failure);
+                }
+            );
         });
     });
 });
