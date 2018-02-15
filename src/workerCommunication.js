@@ -58,7 +58,7 @@ function addMessageResolver(callback, errback) {
 }
 
 // Call the GDAL API function specified by `name`, with an array of arguments
-function callGDAL(name, args) {
+function callWorker(name, args) {
     initWorker();
     return new Promise(function (resolve, reject) {
         workerPromise.then((worker) => {
@@ -81,4 +81,4 @@ function callGDAL(name, args) {
 
 }
 
-export default callGDAL;
+export default callWorker;

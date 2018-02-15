@@ -32,6 +32,12 @@ module.exports = function(config) {
                 watched: false,
                 included: false,
                 served: true
+            },
+            {
+                pattern: 'test/assets/tiny.tif',
+                watched: false,
+                included: false,
+                served: true
             }
         ],
         proxies: {

@@ -2,14 +2,13 @@
 
 // w is for wrap
 import wGDALOpen from './wrappers/gdalOpen.js';
+import wGDALClose from './wrappers/gdalClose.js';
 
 const TIFFPATH = '/tiffs';
 
 let initialized = false;
 
-let registry = {
-    GDALOpen: null
-};
+let registry = {};
 
 self.Module = {
     'print': function (text) { console.log('stdout: ' + text); },
@@ -24,10 +23,19 @@ self.Module = {
         // Note that JS Number types are used to represent pointers, which means that
         // any time we want to pass a pointer to an object, such as in GDALOpen, which in
         // C returns a pointer to a GDALDataset, we need to use 'number'.
+        //
         registry.GDALOpen = wGDALOpen(
             self.Module.cwrap('GDALOpen', 'number', ['string']),
             TIFFPATH
         );
+        registry.GDALClose = wGDALClose(
+            self.Module.cwrap('GDALClose', 'number', ['number']),
+            TIFFPATH
+        );
+        registry.LoamFlushFS = function () {
+            FS.unmount(TIFFPATH);
+            return true;
+        };
         FS.mkdir(TIFFPATH);
         initialized = true;
         postMessage({ready: true});
