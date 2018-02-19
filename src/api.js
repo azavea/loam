@@ -1,11 +1,17 @@
-import callGDAL from './workerCommunication.js';
+import callWorker from './workerCommunication.js';
 import GDALDataset from './gdalDataset.js';
 
 function open(file) {
-    return callGDAL('GDALOpen', [file]).then(
-        function (pointer) { return new GDALDataset(pointer); },
+    return callWorker('GDALOpen', [file]).then(
+        function (openResult) {
+            return new GDALDataset(openResult.datasetPtr, openResult.filePath);
+        },
         function (error) { throw error; }
     );
 }
 
-export { open };
+function flushFS() {
+    return callWorker('LoamFlushFS', []);
+}
+
+export { open, flushFS };
