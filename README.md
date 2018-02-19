@@ -9,7 +9,23 @@ A wrapper for running GDAL in the browser using [gdal-js](https://github.com/ddo
 
 Built libraries are placed in `lib`.
 
-This is largely a stub, but `GDALOpen()` should work.
+# Basic usage
+
+```javascript
+// Assuming you have a `Blob` object from somewhere. `File` objects also work
+loam.open(blob).then((dataset) => {
+  dataset.width()
+    .then((width) => /* do stuff with width */)
+    .then(() => dataset.close()); // It's important to close datasets after you're done with them
+  // Available functions on dataset are:
+  // - width()
+  // - height()
+  // - transform() (returns in GDAL ordering, not affine transform ordering)
+  // - wkt()
+  // - count() (returns number of bands)
+});
+```
+Further examples are available in the tests.
 
 To install, make `loam.min.js` web-accessible or include it in your bundle. Then,
 make sure the following are web-accessible from the same path (but NOT included in
