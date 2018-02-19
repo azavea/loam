@@ -1,8 +1,15 @@
 /* global FS, importScripts, postMessage */
 
 // w is for wrap
+// The wrappers are factories that return functions which perform the necessary setup and
+// teardown for interacting with GDAL inside Emscripten world.
 import wGDALOpen from './wrappers/gdalOpen.js';
 import wGDALClose from './wrappers/gdalClose.js';
+import wGDALGetRasterCount from './wrappers/gdalGetRasterCount.js';
+import wGDALGetRasterXSize from './wrappers/gdalGetRasterXSize.js';
+import wGDALGetRasterYSize from './wrappers/gdalGetRasterYSize.js';
+import wGDALGetProjectionRef from './wrappers/gdalGetProjectionRef.js';
+import wGDALGetGeoTransform from './wrappers/gdalGetGeoTransform.js';
 
 const TIFFPATH = '/tiffs';
 
@@ -31,6 +38,23 @@ self.Module = {
         registry.GDALClose = wGDALClose(
             self.Module.cwrap('GDALClose', 'number', ['number']),
             TIFFPATH
+        );
+        registry.GDALGetRasterCount = wGDALGetRasterCount(
+            self.Module.cwrap('GDALGetRasterCount', 'number', ['number'])
+        );
+        registry.GDALGetRasterXSize = wGDALGetRasterXSize(
+            self.Module.cwrap('GDALGetRasterXSize', 'number', ['number'])
+        );
+        registry.GDALGetRasterYSize = wGDALGetRasterYSize(
+            self.Module.cwrap('GDALGetRasterYSize', 'number', ['number'])
+        );
+        registry.GDALGetProjectionRef = wGDALGetProjectionRef(
+            self.Module.cwrap('GDALGetProjectionRef', 'string', ['number'])
+        );
+        registry.GDALGetGeoTransform = wGDALGetGeoTransform(
+            self.Module.cwrap('GDALGetGeoTransform', 'number', [
+                'number', 'number'
+            ])
         );
         registry.LoamFlushFS = function () {
             FS.unmount(TIFFPATH);
@@ -73,5 +97,9 @@ onmessage = function (msg) {
         }
         return;
     }
-    postMessage({success: false, message: 'No "function" key specified or function not found'});
+    postMessage({
+        success: false,
+        message: 'No "function" key specified or function not found',
+        id: msg.data.id
+    });
 };

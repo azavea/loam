@@ -41,10 +41,9 @@ module.exports = function(config) {
             }
         ],
         proxies: {
-            '/loam-worker.js': '/base/lib/loam-worker.js',
-            '/gdal.js': '/base/node_modules/gdal-js/gdal.js',
-            '/gdal.wasm': '/base/node_modules/gdal-js/gdal.wasm',
-            '/gdal.data': '/base/node_modules/gdal-js/gdal.data'
+            '/base/lib/gdal.js': '/base/node_modules/gdal-js/gdal.js',
+            '/base/lib/gdal.wasm': '/base/node_modules/gdal-js/gdal.wasm',
+            '/base/lib/gdal.data': '/base/node_modules/gdal-js/gdal.data'
         },
         // WebAssembly takes a while to parse
         browserDisconnectTimeout: 4000,
