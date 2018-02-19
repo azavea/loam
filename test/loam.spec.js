@@ -24,7 +24,7 @@ describe('Given that loam exists', () => {
 
     describe('calling open with a Blob', function() {
         // Travis seems to take 7ish seconds
-        this.timeout(8000);
+        this.timeout(15000);
         it('should return a GDALDataset', () => {
             return xhrAsPromiseBlob(tinyTifPath)
                 .then((tifBlob) => loam.open(tifBlob))
@@ -42,7 +42,7 @@ describe('Given that loam exists', () => {
     });
 
     describe('calling count()', function () {
-        this.timeout(8000);
+        this.timeout(15000);
         it('should return the number of bands in the GeoTiff', () => {
             return xhrAsPromiseBlob(tinyTifPath).then((tifBlob) => loam.open(tifBlob).then((ds) => {
                 return ds.count().then((count) => expect(count).to.equal(1));
@@ -51,7 +51,7 @@ describe('Given that loam exists', () => {
     });
 
     describe('calling width()', function () {
-        this.timeout(8000);
+        this.timeout(15000);
         it('should return the x-size of the GeoTiff', () => {
             return xhrAsPromiseBlob(tinyTifPath)
                 .then((tifBlob) => loam.open(tifBlob))
@@ -61,7 +61,7 @@ describe('Given that loam exists', () => {
     });
 
     describe('calling height()', function () {
-        this.timeout(8000);
+        this.timeout(15000);
         it('should return the y-size of the GeoTiff', () => {
             return xhrAsPromiseBlob(tinyTifPath)
                 .then((tifBlob) => loam.open(tifBlob))
@@ -71,7 +71,7 @@ describe('Given that loam exists', () => {
     });
 
     describe('calling wkt()', function () {
-        this.timeout(8000);
+        this.timeout(15000);
         it('should return the GeoTiff\'s WKT CRS string', () => {
             return xhrAsPromiseBlob(tinyTifPath)
                 .then((tifBlob) => loam.open(tifBlob))
@@ -97,7 +97,7 @@ describe('Given that loam exists', () => {
     });
 
     describe('calling transform()', function () {
-        this.timeout(8000);
+        this.timeout(15000);
         it('should return the GeoTiff\'s 6-element GDAL transform array', () => {
             return xhrAsPromiseBlob(tinyTifPath)
                 .then((tifBlob) => loam.open(tifBlob))
@@ -112,7 +112,7 @@ describe('Given that loam exists', () => {
     });
 
     describe('calling close', function() {
-        this.timeout(8000);
+        this.timeout(15000);
         it('should succeed and clear the GDALDataset', function () {
             return xhrAsPromiseBlob(tinyTifPath).then((tifBlob) => loam.open(tifBlob).then((ds) => {
                 ds.close().then((result) => {
