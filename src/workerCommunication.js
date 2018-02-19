@@ -2,6 +2,11 @@ let messages = {};
 
 let workerPromise;
 
+// Cache the currently executing script at initialization so that we can use it later to figure
+// out where all the other scripts should be pulled from
+let _scripts = document.getElementsByTagName('script');
+const THIS_SCRIPT = _scripts[_scripts.length - 1];
+
 // https://stackoverflow.com/questions/10726909/random-alpha-numeric-string-in-javascript
 function randomKey() {
     const length = 32;
@@ -17,12 +22,19 @@ function randomKey() {
     return result;
 }
 
+// Inspired by Emscripten's method for doing the same thing
+function getPathPrefix() {
+    return THIS_SCRIPT.src.substring(
+        0,
+        THIS_SCRIPT.src.lastIndexOf('/')
+    ) + '/';
+}
+
 // Set up a WebWorker and an associated promise that resolves once it's ready
 function initWorker() {
     if (typeof workerPromise === 'undefined') {
         workerPromise = new Promise(function (resolve, reject) {
-            // TODO: Probably pass in this path from outside
-            let _worker = new Worker('loam-worker.js');
+            let _worker = new Worker(getPathPrefix() + 'loam-worker.js');
 
             // The worker needs to do some initialization, and will send a message when it's ready.
             _worker.onmessage = function (msg) {
@@ -31,7 +43,7 @@ function initWorker() {
                     // the stored promise resolvers.
                     _worker.onmessage = function (msg) {
                         // Execute stored promise resolver by message ID
-                        // Promise resolvers are stored by callGDAL.
+                        // Promise resolvers are stored by callWorker().
                         if (msg.data.success) {
                             messages[msg.data.id][0](msg.data.result);
                         } else {
