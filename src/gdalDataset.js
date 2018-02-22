@@ -1,4 +1,4 @@
-import callWorker from './workerCommunication.js';
+import { callWorker } from './workerCommunication.js';
 
 export default class GDALDataset {
     constructor(datasetPtr, filePath) {
