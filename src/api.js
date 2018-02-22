@@ -1,4 +1,4 @@
-import callWorker from './workerCommunication.js';
+import { initWorker, callWorker } from './workerCommunication.js';
 import GDALDataset from './gdalDataset.js';
 
 function open(file) {
@@ -14,4 +14,8 @@ function flushFS() {
     return callWorker('LoamFlushFS', []);
 }
 
-export { open, flushFS };
+function initialize() {
+    return initWorker();
+}
+
+export { open, flushFS, initialize };

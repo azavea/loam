@@ -56,6 +56,7 @@ function initWorker() {
             };
         });
     }
+    return workerPromise;
 }
 
 // Store a listener function with a key so that we can associate it with a message later.
@@ -71,9 +72,8 @@ function addMessageResolver(callback, errback) {
 
 // Call the GDAL API function specified by `name`, with an array of arguments
 function callWorker(name, args) {
-    initWorker();
-    return new Promise(function (resolve, reject) {
-        workerPromise.then((worker) => {
+    return initWorker().then((worker) => {
+        return new Promise(function (resolve, reject) {
             let resolverId = addMessageResolver(
                 function (gdalResult) {
                     resolve(gdalResult);
@@ -90,7 +90,6 @@ function callWorker(name, args) {
             });
         });
     });
-
 }
 
-export default callWorker;
+export { initWorker, callWorker };

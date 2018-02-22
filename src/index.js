@@ -1,4 +1,4 @@
-import { open, flushFS } from './api.js';
+import { open, flushFS, initialize } from './api.js';
 import GDALDataset from './gdalDataset.js';
 
-export { open, flushFS, GDALDataset };
+export default { open, flushFS, GDALDataset, initialize };
