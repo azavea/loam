@@ -3,12 +3,12 @@ export default function (GDALOpen, tiffFolder) {
     return function (file) {
         let filename;
 
-        if (file instanceof Blob) {
-            filename = 'geotiff.tif';
-            FS.mount(WORKERFS, { blobs: [{ name: filename, data: file }] }, tiffFolder);
-        } else if (file instanceof File) {
+        if (file instanceof File) {
             filename = file.name;
             FS.mount(WORKERFS, { files: [file] }, tiffFolder);
+        } else if (file instanceof Blob) {
+            filename = 'geotiff.tif';
+            FS.mount(WORKERFS, { blobs: [{ name: filename, data: file }] }, tiffFolder);
         }
         let filePath = tiffFolder + '/' + filename;
 
