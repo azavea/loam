@@ -1,10 +1,10 @@
 /* global FS */
-export default function (GDALClose, tiffFolder) {
-    return function (datasetPtr, filePath) {
-        let result = GDALClose(datasetPtr);
-
-        FS.unmount(filePath);
-        return result;
+export default function (GDALClose) {
+    return function (datasetPtr, directory) {
+        GDALClose(datasetPtr);
+        FS.unmount(directory);
+        FS.rmdir(directory);
+        return true;
     };
 }
 

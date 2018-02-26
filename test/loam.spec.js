@@ -35,7 +35,7 @@ describe('Given that loam exists', () => {
                     expect(ds).to.be.an.instanceof(loam.GDALDataset);
                     expect(ds.datasetPtr).to.be.a('number', 'datasetPtr was not a number');
                     expect(ds.datasetPtr).not.to.equal(0, 'datasetPtr was 0 (null)');
-                    expect(ds.filePath).to.equal('/tiffs/geotiff.tif');
+                    expect(ds.filename).to.equal('geotiff.tif');
                 });
         });
     });
@@ -111,13 +111,15 @@ describe('Given that loam exists', () => {
 
     describe('calling close', function() {
         it('should succeed and clear the GDALDataset', function () {
-            return xhrAsPromiseBlob(tinyTifPath).then((tifBlob) => loam.open(tifBlob).then((ds) => {
-                ds.close().then((result) => {
-                    expect(result).to.equal(true);
-                    expect(ds.datasetPtr).to.be.an('undefined');
-                    expect(ds.filePath).to.be.an('undefined');
+            return xhrAsPromiseBlob(tinyTifPath).then(tifBlob => {
+                    return loam.open(tifBlob).then(ds => {
+                        return ds.close().then(result => {
+                            expect(result).to.equal(true);
+                            expect(ds.datasetPtr).to.be.an('undefined');
+                            expect(ds.filePath).to.be.an('undefined');
+                        });
+                    });
                 });
-            }));
         });
     });
 });

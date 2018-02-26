@@ -4,7 +4,12 @@ import GDALDataset from './gdalDataset.js';
 function open(file) {
     return callWorker('GDALOpen', [file]).then(
         function (openResult) {
-            return new GDALDataset(openResult.datasetPtr, openResult.filePath);
+            return new GDALDataset(
+                openResult.datasetPtr,
+                openResult.filePath,
+                openResult.directory,
+                openResult.filename
+            );
         },
         function (error) { throw error; }
     );

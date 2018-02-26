@@ -1,3 +1,5 @@
+import randomKey from './randomKey.js';
+
 let messages = {};
 
 let workerPromise;
@@ -6,21 +8,6 @@ let workerPromise;
 // out where all the other scripts should be pulled from
 let _scripts = document.getElementsByTagName('script');
 const THIS_SCRIPT = _scripts[_scripts.length - 1];
-
-// https://stackoverflow.com/questions/10726909/random-alpha-numeric-string-in-javascript
-function randomKey() {
-    const length = 32;
-    const chars = (
-        '0123456789' +
-        'abcdefghijklmnopqrstuvwxzy'
-    );
-    let result = '';
-
-    for (let i = length; i > 0; i--) {
-        result += chars[Math.floor(Math.random() * chars.length)];
-    }
-    return result;
-}
 
 // Inspired by Emscripten's method for doing the same thing
 function getPathPrefix() {

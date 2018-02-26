@@ -11,7 +11,7 @@ import wGDALGetRasterYSize from './wrappers/gdalGetRasterYSize.js';
 import wGDALGetProjectionRef from './wrappers/gdalGetProjectionRef.js';
 import wGDALGetGeoTransform from './wrappers/gdalGetGeoTransform.js';
 
-const TIFFPATH = '/tiffs';
+const DATASETPATH = '/datasets';
 
 let initialized = false;
 
@@ -33,11 +33,11 @@ self.Module = {
         //
         registry.GDALOpen = wGDALOpen(
             self.Module.cwrap('GDALOpen', 'number', ['string']),
-            TIFFPATH
+            DATASETPATH
         );
         registry.GDALClose = wGDALClose(
             self.Module.cwrap('GDALClose', 'number', ['number']),
-            TIFFPATH
+            DATASETPATH
         );
         registry.GDALGetRasterCount = wGDALGetRasterCount(
             self.Module.cwrap('GDALGetRasterCount', 'number', ['number'])
@@ -57,10 +57,15 @@ self.Module = {
             ])
         );
         registry.LoamFlushFS = function () {
-            FS.unmount(TIFFPATH);
+            let datasetFolders = FS.lookupPath(DATASETPATH).node.contents;
+
+            Object.values(datasetFolders).forEach(node => {
+                FS.unmount(FS.getPath(node));
+                FS.rmdir(FS.getPath(node));
+            });
             return true;
         };
-        FS.mkdir(TIFFPATH);
+        FS.mkdir(DATASETPATH);
         initialized = true;
         postMessage({ready: true});
     }
