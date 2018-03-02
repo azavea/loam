@@ -9,12 +9,17 @@ export default class GDALDataset {
     }
 
     close() {
-        return callWorker('GDALClose', [this.datasetPtr, this.directory]).finally(() => {
+        // Delete local data and then pass result / rejection along
+        let deleteSelf = (val) => {
             delete this.datasetPtr;
             delete this.filePath;
             delete this.directory;
             delete this.filename;
-        });
+            return val;
+        };
+
+        return callWorker('GDALClose', [this.datasetPtr, this.directory])
+            .then(deleteSelf, deleteSelf);
     }
 
     count() {
