@@ -1,4 +1,4 @@
-/* global FS, importScripts, postMessage */
+/* global FS, Runtime, importScripts, postMessage */
 
 // w is for wrap
 // The wrappers are factories that return functions which perform the necessary setup and
@@ -16,6 +16,23 @@ const DATASETPATH = '/datasets';
 let initialized = false;
 
 let registry = {};
+let errorHandling = {
+    // In order to make enums available from JS it's necessary to use embind, which seems like
+    // overkill for something this small. But this is a replication of the CPLErr enum in
+    // cpl_error.h
+    CPLErr: {
+        CENone: 0,
+        CEDebug: 1,
+        CEWarning: 2,
+        CEFailure: 3,
+        CEFatal: 4
+    },
+    // These will be populated by onRuntimeInitialized, below
+    CPLErrorReset: null,
+    CPLGetLastErrorMsg: null,
+    CPLGetLastErrorNo: null,
+    CPLGetLastErrorType: null
+};
 
 self.Module = {
     'print': function (text) { console.log('stdout: ' + text); },
@@ -26,6 +43,20 @@ self.Module = {
         // Initialize GDAL
         self.Module.ccall('GDALAllRegister', null, [], []);
 
+        // Set up error handling
+        errorHandling.CPLErrorReset = self.Module.cwrap('CPLErrorReset', null, []);
+        errorHandling.CPLGetLastErrorMsg = self.Module.cwrap('CPLGetLastErrorMsg', 'string', []);
+        errorHandling.CPLGetLastErrorNo = self.Module.cwrap('CPLGetLastErrorNo', 'number', []);
+        errorHandling.CPLGetLastErrorType = self.Module.cwrap('CPLGetLastErrorType', 'number', []);
+        // Get a "function pointer" to the built-in quiet error handler so that errors don't
+        // cause tons of console noise.
+        const cplQuietFnPtr = Runtime.addFunction(
+            self.Module.cwrap('CPLQuietErrorHandler', 'number', ['number'])
+        );
+
+        // Then set the error handler to the quiet handler.
+        self.Module.ccall('CPLSetErrorHandler', 'number', ['number'], [cplQuietFnPtr]);
+
         // Set up JS proxy functions
         // Note that JS Number types are used to represent pointers, which means that
         // any time we want to pass a pointer to an object, such as in GDALOpen, which in
@@ -33,28 +64,34 @@ self.Module = {
         //
         registry.GDALOpen = wGDALOpen(
             self.Module.cwrap('GDALOpen', 'number', ['string']),
+            errorHandling,
             DATASETPATH
         );
         registry.GDALClose = wGDALClose(
             self.Module.cwrap('GDALClose', 'number', ['number']),
-            DATASETPATH
+            errorHandling
         );
         registry.GDALGetRasterCount = wGDALGetRasterCount(
-            self.Module.cwrap('GDALGetRasterCount', 'number', ['number'])
+            self.Module.cwrap('GDALGetRasterCount', 'number', ['number']),
+            errorHandling
         );
         registry.GDALGetRasterXSize = wGDALGetRasterXSize(
-            self.Module.cwrap('GDALGetRasterXSize', 'number', ['number'])
+            self.Module.cwrap('GDALGetRasterXSize', 'number', ['number']),
+            errorHandling
         );
         registry.GDALGetRasterYSize = wGDALGetRasterYSize(
-            self.Module.cwrap('GDALGetRasterYSize', 'number', ['number'])
+            self.Module.cwrap('GDALGetRasterYSize', 'number', ['number']),
+            errorHandling
         );
         registry.GDALGetProjectionRef = wGDALGetProjectionRef(
-            self.Module.cwrap('GDALGetProjectionRef', 'string', ['number'])
+            self.Module.cwrap('GDALGetProjectionRef', 'string', ['number']),
+            errorHandling
         );
         registry.GDALGetGeoTransform = wGDALGetGeoTransform(
             self.Module.cwrap('GDALGetGeoTransform', 'number', [
                 'number', 'number'
-            ])
+            ]),
+            errorHandling
         );
         registry.LoamFlushFS = function () {
             let datasetFolders = FS.lookupPath(DATASETPATH).node.contents;
@@ -96,7 +133,7 @@ onmessage = function (msg) {
         } catch (error) {
             postMessage({
                 success: false,
-                message: error.toString(),
+                message: error.message,
                 id: msg.data.id
             });
         }

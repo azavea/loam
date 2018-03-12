@@ -34,7 +34,7 @@ function initWorker() {
                         if (msg.data.success) {
                             messages[msg.data.id][0](msg.data.result);
                         } else {
-                            messages[msg.data.id][1](msg.data.message);
+                            messages[msg.data.id][1](new Error(msg.data.message));
                         }
                         delete messages[msg.data.id];
                     };
@@ -65,8 +65,8 @@ function callWorker(name, args) {
                 function (gdalResult) {
                     resolve(gdalResult);
                 },
-                function (error) {
-                    reject(error);
+                function (reason) {
+                    reject(reason);
                 }
             );
 

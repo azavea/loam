@@ -1,5 +1,5 @@
 /* global Module */
-export default function (GDALGetGeoTransform) {
+export default function (GDALGetGeoTransform, errorHandling) {
     return function (datasetPtr) {
         // This is the first wrapper where things get a bit hairy; the C function follows a common C
         // pattern where an array to store the results is allocated and passed into the function,
@@ -22,13 +22,23 @@ export default function (GDALGetGeoTransform) {
             byteOffset / Float64Array.BYTES_PER_ELEMENT,
             byteOffset / Float64Array.BYTES_PER_ELEMENT + 6
         );
+        let errorType = errorHandling.CPLGetLastErrorType();
 
-        // To avoid memory leaks in the Emscripten heap, we need to free up the memory we allocated
-        // after we've converted it into a Javascript object.
-        let result = Array.from(geoTransform);
+        // Check for errors; clean up and throw if error is detected
+        if (errorType === errorHandling.CPLErr.CEFailure ||
+                errorType === errorHandling.CPLErr.CEFatal) {
+            Module._free(byteOffset);
+            let message = errorHandling.CPLGetLastErrorMsg();
 
-        Module._free(byteOffset);
+            throw new Error(message);
+        } else {
+            // To avoid memory leaks in the Emscripten heap, we need to free up the memory we allocated
+            // after we've converted it into a Javascript object.
+            let result = Array.from(geoTransform);
 
-        return result;
+            Module._free(byteOffset);
+
+            return result;
+        }
     };
 }

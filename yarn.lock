@@ -2248,9 +2248,9 @@ gauge@~2.7.3:
     strip-ansi "^3.0.1"
     wide-align "^1.1.0"
 
-gdal-js@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/gdal-js/-/gdal-js-1.0.0.tgz#44e58ed2c314d58bd19d921a40b932742e5d7ec1"
+gdal-js@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/gdal-js/-/gdal-js-1.1.0.tgz#78da0e024f98e122206e64ae4f627662acfee5ad"
 
 generate-function@^2.0.0:
   version "2.0.0"

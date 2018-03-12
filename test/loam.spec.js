@@ -1,5 +1,6 @@
 /* global describe, it, before, expect */
 const tinyTifPath = '/base/test/assets/tiny.tif';
+const invalidTifPath = 'base/test/assets/not-a-tiff.bytes';
 
 function xhrAsPromiseBlob(url) {
     let xhr = new XMLHttpRequest();
@@ -120,6 +121,108 @@ describe('Given that loam exists', () => {
                         });
                     });
                 });
+        });
+    });
+
+    /******************************************
+     * Failure cases                          *
+     ******************************************/
+    describe('calling open() on an invalid file', function() {
+        it('should fail and return an error message', function() {
+            return xhrAsPromiseBlob(invalidTifPath)
+                .then(garbage => loam.open(garbage))
+                .then(
+                    () => {
+                        throw new Error('GDALOpen promise should have been rejected');
+                    },
+                    error => expect(error.message).to.include(
+                        'not recognized as a supported file format'
+                    )
+                );
+        });
+    });
+
+    describe('calling close() on an invalid dataset', function() {
+        it('should fail and return an error message', function() {
+            return new loam.GDALDataset(0, 'nothing', 'nothing', 'nothing')
+                .close().then(
+                    (result) => {
+                        throw new Error('close() promise should have been rejected' + result);
+                    },
+                    error => expect(error.message).to.include(
+                        'No such file or directory'
+                    )
+                );
+        });
+    });
+
+    describe('calling transform() on an invalid dataset', function() {
+        it('should fail and return an error message', function() {
+            return new loam.GDALDataset(0, 'nothing', 'nothing', 'nothing')
+                .transform().then(
+                    () => {
+                        throw new Error('transform() promise should have been rejected');
+                    },
+                    error => expect(error.message).to.include(
+                        "'hDS' is NULL in 'GDALGetGeoTransform'"
+                    )
+                );
+        });
+    });
+
+    describe('calling wkt on an invalid dataset', function() {
+        it('should fail and return an error message', function() {
+            return new loam.GDALDataset(0, 'nothing', 'nothing', 'nothing')
+                .wkt().then(
+                    () => {
+                        throw new Error('wkt() promise should have been rejected');
+                    },
+                    error => expect(error.message).to.include(
+                        "'hDS' is NULL in 'GDALGetProjectionRef'"
+                    )
+                );
+        });
+    });
+
+    describe('calling count on an invalid dataset', function() {
+        it('should fail and return an error message', function() {
+            return new loam.GDALDataset(0, 'nothing', 'nothing', 'nothing')
+                .count().then(
+                    () => {
+                        throw new Error('count() promise should have been rejected');
+                    },
+                    error => expect(error.message).to.include(
+                        "'hDS' is NULL in 'GDALGetRasterCount'"
+                    )
+                );
+        });
+    });
+
+    describe('calling width on an invalid dataset', function() {
+        it('should fail and return an error message', function() {
+            return new loam.GDALDataset(0, 'nothing', 'nothing', 'nothing')
+                .width().then(
+                    () => {
+                        throw new Error('width() promise should have been rejected');
+                    },
+                    error => expect(error.message).to.include(
+                        "'hDataset' is NULL in 'GDALGetRasterXSize'"
+                    )
+                );
+        });
+    });
+
+    describe('calling height on an invalid dataset', function() {
+        it('should fail and return an error message', function() {
+            return new loam.GDALDataset(0, 'nothing', 'nothing', 'nothing')
+                .height().then(
+                    () => {
+                        throw new Error('height() promise should have been rejected');
+                    },
+                    error => expect(error.message).to.include(
+                        "'hDataset' is NULL in 'GDALGetRasterYSize'"
+                    )
+                );
         });
     });
 });

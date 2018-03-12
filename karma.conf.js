@@ -34,7 +34,7 @@ module.exports = function(config) {
                 served: true
             },
             {
-                pattern: 'test/assets/tiny.tif',
+                pattern: 'test/assets/*',
                 watched: false,
                 included: false,
                 served: true
