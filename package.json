@@ -1,6 +1,6 @@
 {
   "name": "loam",
-  "version": "1.0.0-alpha.5",
+  "version": "1.0.0-alpha.6",
   "description": "Javascript wrapper for GDAL in the browser",
   "main": "lib/loam.js",
   "scripts": {
