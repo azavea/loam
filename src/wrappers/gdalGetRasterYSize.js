@@ -1,5 +1,16 @@
-export default function (GDALGetRasterYSize) {
+export default function (GDALGetRasterYSize, errorHandling) {
     return function (datasetPtr) {
-        return GDALGetRasterYSize(datasetPtr);
+        let result = GDALGetRasterYSize(datasetPtr);
+        let errorType = errorHandling.CPLGetLastErrorType();
+
+        // Check for errors; clean up and throw if error is detected
+        if (errorType === errorHandling.CPLErr.CEFailure ||
+                errorType === errorHandling.CPLErr.CEFatal) {
+            let message = errorHandling.CPLGetLastErrorMsg();
+
+            throw Error(message);
+        } else {
+            return result;
+        }
     };
 }
