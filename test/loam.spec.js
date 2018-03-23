@@ -115,12 +115,31 @@ describe('Given that loam exists', () => {
             return xhrAsPromiseBlob(tinyTifPath).then(tifBlob => {
                     return loam.open(tifBlob).then(ds => {
                         return ds.close().then(result => {
-                            expect(result).to.equal(true);
+                            expect(result).to.deep.equal([]);
                             expect(ds.datasetPtr).to.be.an('undefined');
                             expect(ds.filePath).to.be.an('undefined');
                         });
                     });
                 });
+        });
+    });
+
+    describe('calling closeAndReadBytes', function() {
+        it('should succeed and return the file contents', function () {
+            return xhrAsPromiseBlob(tinyTifPath)
+                .then(tifBlob => loam.open(tifBlob))
+                .then(ds => ds.closeAndReadBytes())
+                .then(bytes => expect(bytes.length).to.equal(862));
+        });
+    });
+
+    describe('calling convert', function() {
+        it('should succeed and return a new Dataset with the transformed values', function () {
+            return xhrAsPromiseBlob(tinyTifPath)
+                .then(tifBlob => loam.open(tifBlob))
+                .then(ds => ds.convert(['-outsize', '200%', '200%']))
+                .then(newDs => newDs.width())
+                .then(width => expect(width).to.equal(30));
         });
     });
 
@@ -221,6 +240,25 @@ describe('Given that loam exists', () => {
                     },
                     error => expect(error.message).to.include(
                         "'hDataset' is NULL in 'GDALGetRasterYSize'"
+                    )
+                );
+        });
+    });
+
+    describe('calling convert with invalid arguments', function() {
+        it('should fail and return an error message', function() {
+            return xhrAsPromiseBlob(tinyTifPath)
+                .then(tifBlob => loam.open(tifBlob))
+                .then(ds => ds.convert(['-notreal', 'xyz%', 'oink%']))
+                .then(
+                    (result) => {
+                        throw new Error(
+                            'convert() promise should have been rejected but got ' +
+                            result + ' instead.'
+                        );
+                    },
+                    error => expect(error.message).to.include(
+                        "Unknown option name"
                     )
                 );
         });

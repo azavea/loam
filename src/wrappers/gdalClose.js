@@ -1,7 +1,12 @@
 /* global FS */
 export default function (GDALClose, errorHandling) {
-    return function (datasetPtr, directory) {
+    return function (datasetPtr, directory, datasetPath, returnFileBytes = false) {
         GDALClose(datasetPtr);
+        let result = [];
+
+        if (returnFileBytes) {
+            result = FS.readFile(datasetPath, { encoding: 'binary' });
+        }
         FS.unmount(directory);
         FS.rmdir(directory);
 
@@ -14,7 +19,7 @@ export default function (GDALClose, errorHandling) {
 
             throw new Error(message);
         } else {
-            return true;
+            return result;
         }
     };
 }

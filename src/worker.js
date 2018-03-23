@@ -10,6 +10,7 @@ import wGDALGetRasterXSize from './wrappers/gdalGetRasterXSize.js';
 import wGDALGetRasterYSize from './wrappers/gdalGetRasterYSize.js';
 import wGDALGetProjectionRef from './wrappers/gdalGetProjectionRef.js';
 import wGDALGetGeoTransform from './wrappers/gdalGetGeoTransform.js';
+import wGDALTranslate from './wrappers/gdalTranslate.js';
 
 const DATASETPATH = '/datasets';
 
@@ -92,6 +93,16 @@ self.Module = {
                 'number', 'number'
             ]),
             errorHandling
+        );
+        registry.GDALTranslate = wGDALTranslate(
+            self.Module.cwrap('GDALTranslate', 'number', [
+                'string', // Output path
+                'number', // Pointer to GDALDataset
+                'number', // Pointer to GDALTranslateOptions object
+                'number' // Integer to use for error reporting
+            ]),
+            errorHandling,
+            DATASETPATH
         );
         registry.LoamFlushFS = function () {
             let datasetFolders = FS.lookupPath(DATASETPATH).node.contents;
