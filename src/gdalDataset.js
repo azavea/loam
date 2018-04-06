@@ -74,4 +74,18 @@ export default class GDALDataset {
             function (error) { throw error; }
         );
     }
+
+    warp(args) {
+        return callWorker('GDALWarp', [this.datasetPtr, args]).then(
+            function (warpResult) {
+                return new GDALDataset(
+                    warpResult.datasetPtr,
+                    warpResult.filePath,
+                    warpResult.directory,
+                    warpResult.filename
+                );
+            },
+            function (error) { throw error; }
+        );
+    }
 }
