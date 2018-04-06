@@ -143,6 +143,26 @@ describe('Given that loam exists', () => {
         });
     });
 
+    describe('calling warp', function() {
+        it('should succeed and return a new Dataset that has been warped', function () {
+            return xhrAsPromiseBlob(tinyTifPath)
+                .then(tifBlob => loam.open(tifBlob))
+                .then(ds => ds.warp(['-s_srs', 'EPSG:3857', '-t_srs', 'EPSG:4326']))
+                .then(newDS => newDS.transform())
+                // Determined out-of-band by executing gdalwarp on the command line.
+                .then(transform => {
+                    expect(transform).to.deep.equal(
+                        [-75.2803049446235,
+                         0.019340471787624117,
+                         0.0,
+                         40.13881222863268,
+                         0.0,
+                         -0.019340471787624117]
+                    );
+                });
+        });
+    });
+
     /******************************************
      * Failure cases                          *
      ******************************************/
@@ -259,6 +279,25 @@ describe('Given that loam exists', () => {
                     },
                     error => expect(error.message).to.include(
                         "Unknown option name"
+                    )
+                );
+        });
+    });
+
+    describe('calling warp with invalid arguments', function() {
+        it('should fail and return an error message', function() {
+            return xhrAsPromiseBlob(tinyTifPath)
+                .then(tifBlob => loam.open(tifBlob))
+                .then(ds => ds.warp(['-s_srs', 'EPSG:Fake', '-t_srs', 'EPSG:AlsoFake']))
+                .then(
+                    (result) => {
+                        throw new Error(
+                            'warp() promise should have been rejected but got ' +
+                            result + ' instead.'
+                        );
+                    },
+                    error => expect(error.message).to.include(
+                        'Failed to lookup UOM CODE 0'
                     )
                 );
         });
