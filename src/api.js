@@ -5,22 +5,17 @@ function open(file) {
     return callWorker('GDALOpen', [file]).then(
         function (openResult) {
             return new GDALDataset(
-                openResult.datasetPtr,
-                openResult.filePath,
-                openResult.directory,
-                openResult.filename
+                openResult.sources,
+                openResult.headVrt,
+                openResult.vrtParts
             );
         },
         function (error) { throw error; }
     );
 }
 
-function flushFS() {
-    return callWorker('LoamFlushFS', []);
-}
-
 function initialize() {
     return initWorker();
 }
 
-export { open, flushFS, initialize };
+export { open, initialize };
