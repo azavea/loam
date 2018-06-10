@@ -35,6 +35,13 @@ describe('Given that loam exists', () => {
     });
 
     describe('calling open with a File', function () {
+        // This is hard because it's tough to construct a real file without an
+        // actual web browser to click a file-select input.
+        it('should return a GDALDataset');
+    });
+
+    describe('calling open with a URL', function () {
+        // This is really hard because Karma won't do HEAD or RANGE requests.
         it('should return a GDALDataset');
     });
 

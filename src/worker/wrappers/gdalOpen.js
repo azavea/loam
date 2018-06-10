@@ -52,6 +52,9 @@ export default function (GDALOpen, errorHandling, rootPath) {
         } else if (file instanceof Blob) {
             sourceName = randomKey(8) + 'geotiff.tif';
             FS.mount(WORKERFS, { blobs: [{ name: sourceName, data: file }] }, sourceDir);
+        } else if (typeof file === 'string' && file.startsWith('http')) {
+            sourceName = randomKey(8) + 'geotiff.tif';
+            FS.createLazyFile(sourceDir, sourceName, file, true, true);
         }
         const sourcePath = sourceDir + '/' + sourceName;
 
