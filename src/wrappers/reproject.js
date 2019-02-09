@@ -23,14 +23,14 @@ export default function (srcCRSStr, destCRSStr, xCoords, yCoords) {
         ['number', 'number', 'number', 'number', 'number']
     );
 
+    // We need SRSes for the source and destinations of our transformation
     let sourceSrs = OSRNewSpatialReference(srcCRSStr);
-    // Next, we also need an SRS for Lat/Lon
     let targetSrs = OSRNewSpatialReference(destCRSStr);
     // Now we can create a CoordinateTransformation object to transform between the two
     let coordTransform = OCTNewCoordinateTransformation(sourceSrs, targetSrs);
 
     // And lastly, we can transform the Xs and Ys. This requires a similar malloc process to the
-    // affine transform function above, since the coordinates are transformed in-place
+    // affine transform function, since the coordinates are transformed in-place
     let xCoordPtr = Module._malloc(xCoords.length * xCoords.BYTES_PER_ELEMENT);
     let yCoordPtr = Module._malloc(yCoords.length * yCoords.BYTES_PER_ELEMENT);
 
@@ -49,9 +49,10 @@ export default function (srcCRSStr, destCRSStr, xCoords, yCoords) {
         yCoordPtr / yCoords.BYTES_PER_ELEMENT + yCoords.length
     ));
 
-    // zip it all back up and return
+    // Zip it all back up
     let returnVal = transXCoords.map(function (x, i) { return [x, transYCoords[i]]; });
 
+    // Clear memory
     Module._free(xCoordPtr);
     Module._free(yCoordPtr);
     Module.ccall('OSRDestroySpatialReference', 'number', ['number'], [sourceSrs]);
