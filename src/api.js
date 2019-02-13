@@ -15,6 +15,13 @@ function open(file) {
     );
 }
 
+function reproject(fromCRS, toCRS, coords) {
+    var xCoords = new Float64Array(coords.map(function (pair) { return pair[0]; }));
+    var yCoords = new Float64Array(coords.map(function (pair) { return pair[1]; }));
+
+    return callWorker('LoamReproject', [fromCRS, toCRS, xCoords, yCoords]);
+}
+
 function flushFS() {
     return callWorker('LoamFlushFS', []);
 }
@@ -23,4 +30,4 @@ function initialize() {
     return initWorker();
 }
 
-export { open, flushFS, initialize };
+export { open, flushFS, initialize, reproject };

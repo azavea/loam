@@ -12,6 +12,10 @@ Built libraries are placed in `lib`.
 # Basic usage
 
 ```javascript
+// Load WebAssembly and data files asynchronously. Will be called automatically by loam.open()
+// but it is often helpful for responsiveness to pre-initialize. Returns a promise.
+loam.initialize();
+
 // Assuming you have a `Blob` object from somewhere. `File` objects also work
 loam.open(blob).then((dataset) => {
   dataset.width()
@@ -23,7 +27,13 @@ loam.open(blob).then((dataset) => {
   // - transform() (returns in GDAL ordering, not affine transform ordering)
   // - wkt()
   // - count() (returns number of bands)
+  // - convert() (Takes an array of strings that match options to gdal_translate, e.g. ['-of', 'PNG'], returns dataset)
+  // - warp() (Takes an array of strings that match options to gdalwarp https://www.gdal.org/gdalwarp.html, returns dataset)
+
 });
+
+// Utility function for reprojecting points. srcSRS and destSRS must be full WKT strings.
+loam.reproject(srcSRS, destSRS, [[x, y], [x, y], ...]);
 ```
 Further examples are available in the tests.
 

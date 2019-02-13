@@ -12,6 +12,7 @@ import wGDALGetProjectionRef from './wrappers/gdalGetProjectionRef.js';
 import wGDALGetGeoTransform from './wrappers/gdalGetGeoTransform.js';
 import wGDALTranslate from './wrappers/gdalTranslate.js';
 import wGDALWarp from './wrappers/gdalWarp.js';
+import wReproject from './wrappers/reproject.js';
 
 const DATASETPATH = '/datasets';
 
@@ -126,6 +127,7 @@ self.Module = {
             });
             return true;
         };
+        registry.LoamReproject = wReproject;
         FS.mkdir(DATASETPATH);
         initialized = true;
         postMessage({ready: true});
