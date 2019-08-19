@@ -26,8 +26,8 @@ function flushFS() {
     return callWorker('LoamFlushFS', []);
 }
 
-function initialize() {
-    return initWorker();
+function initialize(pathPrefix) {
+    return initWorker(pathPrefix);
 }
 
 export { open, flushFS, initialize, reproject };
