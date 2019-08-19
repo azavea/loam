@@ -13,6 +13,7 @@ import wGDALGetGeoTransform from './wrappers/gdalGetGeoTransform.js';
 import wGDALTranslate from './wrappers/gdalTranslate.js';
 import wGDALWarp from './wrappers/gdalWarp.js';
 import wReproject from './wrappers/reproject.js';
+import wGDALRasterize from './wrappers/gdalRasterize';
 
 const DATASETPATH = '/datasets';
 
@@ -57,7 +58,7 @@ self.Module = {
             self.Module.cwrap('CPLQuietErrorHandler', 'number', ['number'])
         );
 
-        // Then set the error handler to the quiet handler.
+        // // Then set the error handler to the quiet handler.
         self.Module.ccall('CPLSetErrorHandler', 'number', ['number'], [cplQuietFnPtr]);
 
         // Set up JS proxy functions
@@ -66,7 +67,7 @@ self.Module = {
         // C returns a pointer to a GDALDataset, we need to use 'number'.
         //
         registry.GDALOpen = wGDALOpen(
-            self.Module.cwrap('GDALOpen', 'number', ['string']),
+            self.Module.cwrap('GDALOpenEx', 'number', ['string']),
             errorHandling,
             DATASETPATH
         );
@@ -113,6 +114,17 @@ self.Module = {
                 'number', // Number of input datasets
                 'number', // GDALDatasetH * list of source datasets
                 'number', // GDALWarpAppOptions *
+                'number' // int * to use for error reporting
+            ]),
+            errorHandling,
+            DATASETPATH
+        );
+        registry.GDALRasterize = wGDALRasterize(
+            self.Module.cwrap('GDALRasterize', 'number', [
+                'string', // Destination dataset path or NULL
+                'number', // GDALDatasetH destination dataset or NULL
+                'number', // GDALDatasetH source dataset handle
+                'number', // GDALRasterizeOptions * or NULL,
                 'number' // int * to use for error reporting
             ]),
             errorHandling,

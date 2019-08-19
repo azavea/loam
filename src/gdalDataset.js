@@ -88,4 +88,18 @@ export default class GDALDataset {
             function (error) { throw error; }
         );
     }
+
+    rasterize(args) {
+        return callWorker('GDALRasterize', [this.datasetPtr, args]).then(
+            function (result) {
+                return new GDALDataset(
+                    result.datasetPtr,
+                    result.filePath,
+                    result.directory,
+                    result.filename
+                );
+            },
+            function (error) { throw error; }
+        );
+    }
 }
