@@ -175,20 +175,6 @@ describe('Given that loam exists', () => {
     /**
      * Failure cases
      **/
-    describe('calling open() on an invalid file', function () {
-        it('should fail and return an error message', function () {
-            return xhrAsPromiseBlob(invalidTifPath)
-                .then(garbage => loam.open(garbage))
-                .then(
-                    () => {
-                        throw new Error('GDALOpen promise should have been rejected');
-                    },
-                    error => expect(error.message).to.include(
-                        'not recognized as a supported file format'
-                    )
-                );
-        });
-    });
 
     describe('calling convert with invalid arguments', function () {
         it('should fail and return an error message', function () {
