@@ -18,10 +18,12 @@ function getPathPrefix() {
 }
 
 // Set up a WebWorker and an associated promise that resolves once it's ready
-function initWorker() {
+function initWorker(pathPrefix) {
+    pathPrefix = pathPrefix || getPathPrefix();
+
     if (typeof workerPromise === 'undefined') {
         workerPromise = new Promise(function (resolve, reject) {
-            let _worker = new Worker(getPathPrefix() + 'loam-worker.js');
+            let _worker = new Worker(pathPrefix + 'loam-worker.js');
 
             // The worker needs to do some initialization, and will send a message when it's ready.
             _worker.onmessage = function (msg) {

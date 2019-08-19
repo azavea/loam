@@ -16,8 +16,8 @@ function reproject(fromCRS, toCRS, coords) {
     return runOnWorker('LoamReproject', [fromCRS, toCRS, xCoords, yCoords]);
 }
 
-function initialize() {
-    return initWorker();
+function initialize(pathPrefix) {
+    return initWorker(pathPrefix);
 }
 
 export { open, initialize, reproject };
