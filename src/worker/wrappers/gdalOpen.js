@@ -10,6 +10,7 @@ export default function (GDALOpen, errorHandling, rootPath) {
         // TODO: Use the throwIfError helper here (may need multiple cleanup functions?)
         let sourceDir;
         let sourcePathPtr;
+        let sourcePath;
         let frees;
         let vrtDir;
         let vrtDs;
@@ -25,7 +26,15 @@ export default function (GDALOpen, errorHandling, rootPath) {
             if (typeof vrtDs !== 'undefined') {
                 FS.unlink(vrtPath);
             }
-            FS.unmount(sourceDir);
+            const sourceDirInfo = FS.lookupPath(sourceDir);
+
+            // It's a plain directory
+            if (sourceDirInfo.node.mount.mountpoint === '/') {
+                FS.unlink(sourcePath);
+            } else { // There's a device mounted there
+                FS.unmount(sourceDir);
+            }
+            // And now we can remove it.
             FS.rmdir(sourceDir);
             if (typeof sourcePathPtr !== 'undefined' && sourcePathPtr !== 0) {
                 Module._free(sourcePathPtr);
@@ -56,7 +65,7 @@ export default function (GDALOpen, errorHandling, rootPath) {
             sourceName = randomKey(8) + 'geotiff.tif';
             FS.createLazyFile(sourceDir, sourceName, file, true, true);
         }
-        const sourcePath = sourceDir + '/' + sourceName;
+        sourcePath = sourceDir + '/' + sourceName;
 
         // BuildVRT only issues warnings on invalid file types, not failures, so we need to do a
         // validation stage to make sure this is a valid file.
@@ -85,6 +94,7 @@ export default function (GDALOpen, errorHandling, rootPath) {
         cleanup();
 
         // Return
+        console.log('Open finished');
         return {
             sources: [new SourceFile(sourceName, [rootPath, sourceDirName], file)],
             headVrt: new VRT(vrtName, [rootPath, vrtDirName], vrtText),

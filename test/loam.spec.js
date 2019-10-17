@@ -45,6 +45,20 @@ describe('Given that loam exists', () => {
         it('should return a GDALDataset');
     });
 
+    describe('calling mosaic() with multiple datasets', function () {
+        it('should return a dataset with the sum of the vrts and sources of the constituents', () => {
+            function dsPromise() {
+                return xhrAsPromiseBlob(tinyTifPath).then((tifBlob) => loam.open(tifBlob));
+            }
+            return Promise.all([dsPromise(), dsPromise()])
+                .then((datasets) => loam.mosaic(datasets))
+                .then((mosaicDs) => {
+                    expect(mosaicDs.sources.length).to.equal(2);
+                    expect(mosaicDs.vrtParts.length).to.equal(2);
+                });
+        });
+    });
+
     describe('calling count()', function () {
         it('should return the number of bands in the GeoTiff', () => {
             return xhrAsPromiseBlob(tinyTifPath).then((tifBlob) => loam.open(tifBlob).then((ds) => {

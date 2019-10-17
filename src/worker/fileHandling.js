@@ -8,6 +8,8 @@ export function assembleDatasetFiles(headVrt, vrtParts, sources) {
             FS.mount(WORKERFS, { files: [src.source] }, src.dirPath);
         } else if (src.source instanceof Blob) {
             FS.mount(WORKERFS, { blobs: [{ name: src.localname, data: src.source }] }, src.dirPath);
+        } else if (typeof src.source === 'string' && src.source.startsWith('http')) {
+            FS.createLazyFile(src.dirPath, src.localname, src.source, true, true);
         }
     });
 
@@ -35,7 +37,15 @@ export function wipeDatasetFiles(headVrt, vrtParts, sources) {
     });
 
     sources.map(function (src) {
-        FS.unmount(src.dirPath);
+        const sourceDirInfo = FS.lookupPath(src.dirPath);
+
+        // It's a plain directory
+        if (sourceDirInfo.node.mount.mountpoint === '/') {
+            FS.unlink(src.fullPath);
+        } else { // There's a device mounted there
+            FS.unmount(src.dirPath);
+        }
+        // And now we can remove it.
         FS.rmdir(src.dirPath);
     });
 }

@@ -18,4 +18,17 @@ function initialize() {
     return initWorker();
 }
 
-export { open, initialize };
+function mosaic(datasets, args) {
+    return callWorker('GDALBuildVRT', [datasets, args]).then(
+        function (vrtResult) {
+            return new GDALDataset(
+                vrtResult.sources,
+                vrtResult.headVrt,
+                vrtResult.vrtParts
+            );
+        },
+        function (error) { throw error; }
+    );
+}
+
+export { open, initialize, mosaic };

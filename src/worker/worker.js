@@ -4,6 +4,7 @@
 // The wrappers are factories that return functions which perform the necessary setup and
 // teardown for interacting with GDAL inside Emscripten world.
 import wGDALOpen from './wrappers/gdalOpen.js';
+import wGDALBuildVRT from './wrappers/gdalBuildVRT.js';
 import wGDALClose from './wrappers/gdalClose.js';
 import wGDALGetRasterCount from './wrappers/gdalGetRasterCount.js';
 import wGDALGetRasterXSize from './wrappers/gdalGetRasterXSize.js';
@@ -69,6 +70,18 @@ self.Module = {
             errorHandling,
             DATASETPATH
         );
+        registry.GDALBuildVRT = wGDALBuildVRT(
+            self.Module.cwrap('GDALBuildVRT', 'number', [
+                'string', // Output path
+                'number', // Number of input datasets
+                'number', // GDALDatasetH * (list of input datasets)
+                'number', // char ** (list of input dataset names -- exclusive with previous)
+                'number', // GDALBuildVRTOptions *
+                'number' // int * usage error pointer
+            ]),
+            errorHandling,
+            DATASETPATH
+        );
         registry.GDALClose = wGDALClose(
             self.Module.cwrap('GDALClose', 'number', ['number']),
             errorHandling
@@ -117,15 +130,6 @@ self.Module = {
             errorHandling,
             DATASETPATH
         );
-        registry.LoamFlushFS = function () {
-            let datasetFolders = FS.lookupPath(DATASETPATH).node.contents;
-
-            Object.values(datasetFolders).forEach(node => {
-                FS.unmount(FS.getPath(node));
-                FS.rmdir(FS.getPath(node));
-            });
-            return true;
-        };
         FS.mkdir(DATASETPATH);
         initialized = true;
         postMessage({ready: true});
