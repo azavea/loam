@@ -4,12 +4,15 @@ export default function (srcCRSStr, destCRSStr, xCoords, yCoords) {
     if (xCoords.length !== yCoords.length) {
         throw new Error('Got mismatched numbers of x and y coordinates.');
     }
+
     let OSRNewSpatialReference = Module.cwrap('OSRNewSpatialReference', 'number', ['string']);
+
     let OCTNewCoordinateTransformation = Module.cwrap(
         'OCTNewCoordinateTransformation',
         'number',
         ['number', 'number']
     );
+
     // Transform arrays of coordinates in-place
     // Params are:
     // 1. Coordinate transformation to use
@@ -25,13 +28,16 @@ export default function (srcCRSStr, destCRSStr, xCoords, yCoords) {
 
     // We need SRSes for the source and destinations of our transformation
     let sourceSrs = OSRNewSpatialReference(srcCRSStr);
+
     let targetSrs = OSRNewSpatialReference(destCRSStr);
+
     // Now we can create a CoordinateTransformation object to transform between the two
     let coordTransform = OCTNewCoordinateTransformation(sourceSrs, targetSrs);
 
     // And lastly, we can transform the Xs and Ys. This requires a similar malloc process to the
     // affine transform function, since the coordinates are transformed in-place
     let xCoordPtr = Module._malloc(xCoords.length * xCoords.BYTES_PER_ELEMENT);
+
     let yCoordPtr = Module._malloc(yCoords.length * yCoords.BYTES_PER_ELEMENT);
 
     // But this time we copy into the memory space from our external array
@@ -44,6 +50,7 @@ export default function (srcCRSStr, destCRSStr, xCoords, yCoords) {
         xCoordPtr / xCoords.BYTES_PER_ELEMENT,
         xCoordPtr / xCoords.BYTES_PER_ELEMENT + xCoords.length
     ));
+
     let transYCoords = Array.from(Module.HEAPF64.subarray(
         yCoordPtr / yCoords.BYTES_PER_ELEMENT,
         yCoordPtr / yCoords.BYTES_PER_ELEMENT + yCoords.length

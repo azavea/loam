@@ -22,6 +22,7 @@ export default function (GDALGetGeoTransform, errorHandling) {
             byteOffset / Float64Array.BYTES_PER_ELEMENT,
             byteOffset / Float64Array.BYTES_PER_ELEMENT + 6
         );
+
         let errorType = errorHandling.CPLGetLastErrorType();
 
         // Check for errors; clean up and throw if error is detected

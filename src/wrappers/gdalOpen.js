@@ -4,6 +4,7 @@ import randomKey from '../randomKey.js';
 export default function (GDALOpen, errorHandling, rootPath) {
     return function (file) {
         let filename;
+
         let directory = rootPath + '/' + randomKey();
 
         FS.mkdir(directory);
@@ -16,7 +17,9 @@ export default function (GDALOpen, errorHandling, rootPath) {
             FS.mount(WORKERFS, { blobs: [{ name: filename, data: file }] }, directory);
         }
         let filePath = directory + '/' + filename;
+
         let datasetPtr = GDALOpen(filePath);
+
         let errorType = errorHandling.CPLGetLastErrorType();
 
         // Check for errors; clean up and throw if error is detected
