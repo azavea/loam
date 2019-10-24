@@ -320,4 +320,42 @@ describe('Given that loam exists', () => {
                 );
         });
     });
+
+    describe('calling convert with non-string arguments', function () {
+        it('should fail and return an error message', function () {
+            return xhrAsPromiseBlob(tinyTifPath)
+                .then(tifBlob => loam.open(tifBlob))
+                .then(ds => ds.convert(['-outsize', 25]))
+                .then(
+                    (result) => {
+                        throw new Error(
+                            'convert() promise should have been rejected but got ' +
+                            result + ' instead.'
+                        );
+                    },
+                    error => expect(error.message).to.include(
+                        'All items in the argument list must be strings'
+                    )
+                );
+        });
+    });
+
+    describe('calling warp with non-string arguments', function () {
+        it('should fail and return an error message', function () {
+            return xhrAsPromiseBlob(tinyTifPath)
+                .then(tifBlob => loam.open(tifBlob))
+                .then(ds => ds.warp(['-order', 2]))
+                .then(
+                    (result) => {
+                        throw new Error(
+                            'warp() promise should have been rejected but got ' +
+                            result + ' instead.'
+                        );
+                    },
+                    error => expect(error.message).to.include(
+                        'All items in the argument list must be strings'
+                    )
+                );
+        });
+    });
 });

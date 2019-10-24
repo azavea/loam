@@ -1,10 +1,14 @@
 import randomKey from '../randomKey.js';
 import guessFileExtension from '../guessFileExtension.js';
+import { isArrayAllStrings } from '../validation.js';
 
 /* global Module, FS, MEMFS */
 export default function (GDALTranslate, errorHandling, rootPath) {
     // Args is expected to be an array of strings that could function as arguments to gdal_translate
     return function (dataset, args) {
+        if (!isArrayAllStrings(args)) {
+            throw new Error('All items in the argument list must be strings');
+        }
         // So first, we need to allocate Emscripten heap space sufficient to store each string as a
         // null-terminated C string.
         // Because the C function signature is char **, this array of pointers is going to need to
