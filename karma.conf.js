@@ -1,4 +1,4 @@
-module.exports = function(config) {
+module.exports = function (config) {
     config.set({
         frameworks: ['mocha', 'chai'],
         preprocessors: {
@@ -48,7 +48,7 @@ module.exports = function(config) {
         // WebAssembly takes a while to parse
         browserDisconnectTimeout: 4000,
         reporters: ['progress'],
-        port: 9876,  // karma web server port
+        port: 9876, // karma web server port
         colors: true,
         logLevel: config.LOG_INFO,
         browsers: ['ChromeHeadless'],

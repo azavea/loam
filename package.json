@@ -27,29 +27,29 @@
     "url": "https://github.com/azavea/loam/issues"
   },
   "files": [
-      "lib/"
+    "lib/"
   ],
   "homepage": "https://github.com/azavea/loam",
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.0",
-    "babel-eslint": "^8.0.3",
-    "babel-loader": "^7.1.2",
-    "babel-plugin-add-module-exports": "^0.2.1",
-    "babel-preset-env": "^1.6.1",
+    "@babel/cli": "^7.0.0",
+    "@babel/core": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "babel-eslint": "^10.0.0",
+    "babel-loader": "^8.0.0",
+    "babel-plugin-add-module-exports": "^1.0.2",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "eslint": "^4.13.1",
     "eslint-loader": "^1.9.0",
-    "karma": "^2.0.0",
-    "karma-babel-preprocessor": "^7.0.0",
+    "karma": "^4.0.0",
+    "karma-babel-preprocessor": "^8.0.0",
     "karma-chai": "^0.1.0",
     "karma-chai-as-promised": "^0.1.2",
-    "karma-chrome-launcher": "^2.2.0",
+    "karma-chrome-launcher": "^3.1.0",
     "karma-mocha": "^1.3.0",
-    "mocha": "^4.0.1",
+    "mocha": "^6.0.0",
     "webpack": "^3.10.0",
-    "yargs": "^10.0.3"
+    "yargs": "^14.0.0"
   },
   "dependencies": {
     "gdal-js": "^1.1.0"

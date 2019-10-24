@@ -40,6 +40,7 @@ export default function (GDALWarp, errorHandling, rootPath) {
             ['number', 'number'],
             [argPtrsArrayPtr, null]
         );
+
         // Validate that the options were correct
         let optionsErrType = errorHandling.CPLGetLastErrorType();
 
@@ -61,7 +62,9 @@ export default function (GDALWarp, errorHandling, rootPath) {
         // through the whole directory structure.
         FS.mount(MEMFS, {}, directory);
         let filename = randomKey(8) + '.' + guessFileExtension(args);
+
         let filePath = directory + '/' + filename;
+
         // And then we can kick off the actual warping process.
         // TODO: The last parameter is an int* that can be used to detect certain kinds of errors,
         // but I'm not sure how it works yet and whether it gives the same or different information
@@ -85,6 +88,7 @@ export default function (GDALWarp, errorHandling, rootPath) {
             warpAppOptionsPtr,
             usageErrPtr
         );
+
         let errorType = errorHandling.CPLGetLastErrorType();
         // If we ever want to use the usage error pointer:
         // let usageErr = Module.getValue(usageErrPtr, 'i32');

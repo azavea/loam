@@ -19,6 +19,7 @@ const DATASETPATH = '/datasets';
 let initialized = false;
 
 let registry = {};
+
 let errorHandling = {
     // In order to make enums available from JS it's necessary to use embind, which seems like
     // overkill for something this small. But this is a replication of the CPLErr enum in
@@ -145,6 +146,7 @@ onmessage = function (msg) {
     }
     if (msg.data['function'] && registry[msg.data['function']]) {
         let func = registry[msg.data['function']];
+
         let args = msg.data.arguments;
 
         // TODO: More error handling
