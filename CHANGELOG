@@ -1,0 +1,7 @@
+## Upcoming release
+- Package updates to resolve security alerts
+- Validate that parameters to `warp()` and `convert()` are strings
+- Add CHANGELOG, PR template
+
+## 1.0.0-alpha.10 (2019-02-13)
+- Add `reproject()` utility function
