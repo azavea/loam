@@ -16,15 +16,24 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        node-version: [10.x, 12.x]
+
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
+    # Set up Node with the matrixed version
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
 
-    # Runs a single command using the runners shell
+    # Install dependencies
     - name: Install dependencies
-      run: yarn install
+      run: yarn install --frozen-lockfile
 
-    # Runs a set of commands using the runners shell
+    # Run tests
     - name: Tests
       run: 'yarn test:ci'
