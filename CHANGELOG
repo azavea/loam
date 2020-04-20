@@ -1,4 +1,5 @@
 ## Upcoming release
+- Set up CI and automatic releases via GitHub Actions
 - Package updates to resolve security alerts
 - Validate that parameters to `warp()` and `convert()` are strings
 - Add CHANGELOG, PR template

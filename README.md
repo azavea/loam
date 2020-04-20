@@ -1,6 +1,6 @@
 A wrapper for running GDAL in the browser using [gdal-js](https://github.com/ddohler/gdal-js/)
 
-[![Build Status](https://travis-ci.org/azavea/loam.svg?branch=develop)](https://travis-ci.org/azavea/loam)
+![](https://github.com/azavea/loam/workflows/Tests/badge.svg)
 
 # Developing
 
