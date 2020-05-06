@@ -25,5 +25,6 @@ Optional. Ancillary topics, caveats, alternative strategies that didn't work out
 ## Checklist
 
 - [ ] Add entry to CHANGELOG.md
+- [ ] Update the README with any function signature changes
 
 Resolves #XXX
