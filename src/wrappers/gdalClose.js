@@ -7,6 +7,7 @@ export default function (GDALClose, errorHandling) {
         if (returnFileBytes) {
             result = FS.readFile(datasetPath, { encoding: 'binary' });
         }
+
         FS.unmount(directory);
         FS.rmdir(directory);
 

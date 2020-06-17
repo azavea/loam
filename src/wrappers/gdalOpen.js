@@ -5,7 +5,7 @@ export default function (GDALOpen, errorHandling, rootPath) {
     return function (file) {
         let filename;
 
-        let directory = rootPath + '/' + randomKey();
+        let directory = rootPath + randomKey();
 
         FS.mkdir(directory);
 

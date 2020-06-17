@@ -1,4 +1,4 @@
-/* global FS, Runtime, importScripts, postMessage */
+/* global FS, addFunction, importScripts, postMessage */
 
 // w is for wrap
 // The wrappers are factories that return functions which perform the necessary setup and
@@ -14,7 +14,7 @@ import wGDALTranslate from './wrappers/gdalTranslate.js';
 import wGDALWarp from './wrappers/gdalWarp.js';
 import wReproject from './wrappers/reproject.js';
 
-const DATASETPATH = '/datasets';
+const DATASETPATH = '/';
 
 let initialized = false;
 
@@ -44,94 +44,99 @@ self.Module = {
     // Optimized builds contain a .js.mem file which is loaded asynchronously;
     // this waits until that has finished before performing further setup.
     'onRuntimeInitialized': function () {
-        // Initialize GDAL
-        self.Module.ccall('GDALAllRegister', null, [], []);
+        try {
+            // Initialize GDAL
+            self.Module.ccall('GDALAllRegister', null, [], []);
 
-        // Set up error handling
-        errorHandling.CPLErrorReset = self.Module.cwrap('CPLErrorReset', null, []);
-        errorHandling.CPLGetLastErrorMsg = self.Module.cwrap('CPLGetLastErrorMsg', 'string', []);
-        errorHandling.CPLGetLastErrorNo = self.Module.cwrap('CPLGetLastErrorNo', 'number', []);
-        errorHandling.CPLGetLastErrorType = self.Module.cwrap('CPLGetLastErrorType', 'number', []);
-        // Get a "function pointer" to the built-in quiet error handler so that errors don't
-        // cause tons of console noise.
-        const cplQuietFnPtr = Runtime.addFunction(
-            self.Module.cwrap('CPLQuietErrorHandler', 'number', ['number'])
-        );
+            // Set up error handling
+            errorHandling.CPLErrorReset = self.Module.cwrap('CPLErrorReset', null, []);
+            errorHandling.CPLGetLastErrorMsg = self.Module.cwrap('CPLGetLastErrorMsg', 'string', []);
+            errorHandling.CPLGetLastErrorNo = self.Module.cwrap('CPLGetLastErrorNo', 'number', []);
+            errorHandling.CPLGetLastErrorType = self.Module.cwrap('CPLGetLastErrorType', 'number', []);
+            // Get a "function pointer" to the built-in quiet error handler so that errors don't
+            // cause tons of console noise.
+            const cplQuietFnPtr = addFunction(
+                self.Module.cwrap('CPLQuietErrorHandler', null, ['number', 'number', 'string']),
+                'viii'
+            );
 
-        // Then set the error handler to the quiet handler.
-        self.Module.ccall('CPLSetErrorHandler', 'number', ['number'], [cplQuietFnPtr]);
+            // Then set the error handler to the quiet handler.
+            self.Module.ccall('CPLSetErrorHandler', 'number', ['number'], [cplQuietFnPtr]);
 
-        // Set up JS proxy functions
-        // Note that JS Number types are used to represent pointers, which means that
-        // any time we want to pass a pointer to an object, such as in GDALOpen, which in
-        // C returns a pointer to a GDALDataset, we need to use 'number'.
-        //
-        registry.GDALOpen = wGDALOpen(
-            self.Module.cwrap('GDALOpen', 'number', ['string']),
-            errorHandling,
-            DATASETPATH
-        );
-        registry.GDALClose = wGDALClose(
-            self.Module.cwrap('GDALClose', 'number', ['number']),
-            errorHandling
-        );
-        registry.GDALGetRasterCount = wGDALGetRasterCount(
-            self.Module.cwrap('GDALGetRasterCount', 'number', ['number']),
-            errorHandling
-        );
-        registry.GDALGetRasterXSize = wGDALGetRasterXSize(
-            self.Module.cwrap('GDALGetRasterXSize', 'number', ['number']),
-            errorHandling
-        );
-        registry.GDALGetRasterYSize = wGDALGetRasterYSize(
-            self.Module.cwrap('GDALGetRasterYSize', 'number', ['number']),
-            errorHandling
-        );
-        registry.GDALGetProjectionRef = wGDALGetProjectionRef(
-            self.Module.cwrap('GDALGetProjectionRef', 'string', ['number']),
-            errorHandling
-        );
-        registry.GDALGetGeoTransform = wGDALGetGeoTransform(
-            self.Module.cwrap('GDALGetGeoTransform', 'number', [
-                'number', 'number'
-            ]),
-            errorHandling
-        );
-        registry.GDALTranslate = wGDALTranslate(
-            self.Module.cwrap('GDALTranslate', 'number', [
-                'string', // Output path
-                'number', // GDALDatasetH source dataset
-                'number', // GDALTranslateOptions *
-                'number' // int * to use for error reporting
-            ]),
-            errorHandling,
-            DATASETPATH
-        );
-        registry.GDALWarp = wGDALWarp(
-            self.Module.cwrap('GDALWarp', 'number', [
-                'string', // Destination dataset path or NULL
-                'number', // GDALDatasetH destination dataset or NULL
-                'number', // Number of input datasets
-                'number', // GDALDatasetH * list of source datasets
-                'number', // GDALWarpAppOptions *
-                'number' // int * to use for error reporting
-            ]),
-            errorHandling,
-            DATASETPATH
-        );
-        registry.LoamFlushFS = function () {
-            let datasetFolders = FS.lookupPath(DATASETPATH).node.contents;
+            // Set up JS proxy functions
+            // Note that JS Number types are used to represent pointers, which means that
+            // any time we want to pass a pointer to an object, such as in GDALOpen, which in
+            // C returns a pointer to a GDALDataset, we need to use 'number'.
+            //
+            registry.GDALOpen = wGDALOpen(
+                self.Module.cwrap('GDALOpen', 'number', ['string']),
+                errorHandling,
+                DATASETPATH
+            );
+            registry.GDALClose = wGDALClose(
+                self.Module.cwrap('GDALClose', 'number', ['number']),
+                errorHandling
+            );
+            registry.GDALGetRasterCount = wGDALGetRasterCount(
+                self.Module.cwrap('GDALGetRasterCount', 'number', ['number']),
+                errorHandling
+            );
+            registry.GDALGetRasterXSize = wGDALGetRasterXSize(
+                self.Module.cwrap('GDALGetRasterXSize', 'number', ['number']),
+                errorHandling
+            );
+            registry.GDALGetRasterYSize = wGDALGetRasterYSize(
+                self.Module.cwrap('GDALGetRasterYSize', 'number', ['number']),
+                errorHandling
+            );
+            registry.GDALGetProjectionRef = wGDALGetProjectionRef(
+                self.Module.cwrap('GDALGetProjectionRef', 'string', ['number']),
+                errorHandling
+            );
+            registry.GDALGetGeoTransform = wGDALGetGeoTransform(
+                self.Module.cwrap('GDALGetGeoTransform', 'number', [
+                    'number', 'number'
+                ]),
+                errorHandling
+            );
+            registry.GDALTranslate = wGDALTranslate(
+                self.Module.cwrap('GDALTranslate', 'number', [
+                    'string', // Output path
+                    'number', // GDALDatasetH source dataset
+                    'number', // GDALTranslateOptions *
+                    'number' // int * to use for error reporting
+                ]),
+                errorHandling,
+                DATASETPATH
+            );
+            registry.GDALWarp = wGDALWarp(
+                self.Module.cwrap('GDALWarp', 'number', [
+                    'string', // Destination dataset path or NULL
+                    'number', // GDALDatasetH destination dataset or NULL
+                    'number', // Number of input datasets
+                    'number', // GDALDatasetH * list of source datasets
+                    'number', // GDALWarpAppOptions *
+                    'number' // int * to use for error reporting
+                ]),
+                errorHandling,
+                DATASETPATH
+            );
+            registry.LoamFlushFS = function () {
+                let datasetFolders = FS.lookupPath(DATASETPATH).node.contents;
 
-            Object.values(datasetFolders).forEach(node => {
-                FS.unmount(FS.getPath(node));
-                FS.rmdir(FS.getPath(node));
-            });
-            return true;
-        };
-        registry.LoamReproject = wReproject;
-        FS.mkdir(DATASETPATH);
-        initialized = true;
-        postMessage({ready: true});
+                Object.values(datasetFolders).forEach(node => {
+                    FS.unmount(FS.getPath(node));
+                    FS.rmdir(FS.getPath(node));
+                });
+                return true;
+            };
+            registry.LoamReproject = wReproject;
+            initialized = true;
+            postMessage({ready: true});
+        } catch (error) {
+            console.error(error);
+            postMessage({error: error});
+        }
     }
 };
 
@@ -139,37 +144,75 @@ self.Module = {
 // Module.onRuntimeInitialized() when it is ready for user code to interact with it.
 importScripts('gdal.js');
 
+function handleDatasetAccess(accessor, dataset) {
+    // 1: Open the source.
+    let srcDs = registry.GDALOpen(dataset.source);
+
+    let resultDs = srcDs;
+
+    // Run the operations (transformations) encapsulated in the dataset. This is a list of GDALWarp
+    // and/or GDALTranslate calls.
+    // 2. Run first operation on the open dataset.
+    // 3. Close open dataset, delete files.
+    // 4. If forther operations, back to 2, otherwise pass open dataset along so the data can be
+    // accessed.
+    for (const {func: op, args: args} of dataset.operations) {
+        resultDs = registry[op](srcDs.datasetPtr, args);
+        registry.GDALClose(srcDs.datasetPtr, srcDs.directory, srcDs.filePath);
+        srcDs = resultDs;
+    }
+
+    let result;
+
+    if (accessor === 'LoamReadBytes') {
+        result = registry.GDALClose(resultDs.datasetPtr, resultDs.directory, resultDs.filePath, true);
+    } else if (accessor) {
+        result = registry[accessor](resultDs.datasetPtr);
+        registry.GDALClose(resultDs.datasetPtr, resultDs.directory, resultDs.filePath, false);
+    } else {
+        registry.GDALClose(resultDs.datasetPtr, resultDs.directory, resultDs.filePath, false);
+    }
+    return result;
+}
+
+// Handle function call
+function handleFunctionCall(func, args) {
+    if (func in registry) {
+        return registry[func](...args);
+    }
+    throw new Error(`Function ${func} was not found`);
+}
+
 onmessage = function (msg) {
     if (!initialized) {
-        postMessage({success: false, message: 'Runtime not yet initialized'});
+        postMessage({success: false, message: 'Runtime not yet initialized', id: msg.data.id});
         return;
     }
-    if (msg.data['function'] && registry[msg.data['function']]) {
-        let func = registry[msg.data['function']];
+    try {
+        let result;
 
-        let args = msg.data.arguments;
-
-        // TODO: More error handling
-        try {
-            let result = func(...args);
-
-            postMessage({
-                success: true,
-                result: result,
-                id: msg.data.id
-            });
-        } catch (error) {
+        if ('func' in msg.data && 'args' in msg.data) {
+            result = handleFunctionCall(msg.data.func, msg.data.args);
+        } else if ('accessor' in msg.data && 'dataset' in msg.data) {
+            result = handleDatasetAccess(msg.data.accessor, msg.data.dataset);
+        } else {
             postMessage({
                 success: false,
-                message: error.message,
+                message: 'Worker could not parse message: either func + args or accessor + dataset is required',
                 id: msg.data.id
             });
+            return;
         }
-        return;
+        postMessage({
+            success: true,
+            result: result,
+            id: msg.data.id
+        });
+    } catch (error) {
+        postMessage({
+            success: false,
+            message: error.message,
+            id: msg.data.id
+        });
     }
-    postMessage({
-        success: false,
-        message: 'No "function" key specified or function not found',
-        id: msg.data.id
-    });
 };

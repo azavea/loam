@@ -39,6 +39,8 @@ function initWorker() {
                         delete messages[msg.data.id];
                     };
                     resolve(_worker);
+                } else if (msg.data.error) {
+                    reject(msg.data.error);
                 }
             };
         });
@@ -57,26 +59,29 @@ function addMessageResolver(callback, errback) {
     return key;
 }
 
-// Call the GDAL API function specified by `name`, with an array of arguments
-function callWorker(name, args) {
+// Send a message to the worker and return a promise that resolves / rejects when a message with
+// a matching id is returned.
+function workerTaskPromise(options) {
     return initWorker().then((worker) => {
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
             let resolverId = addMessageResolver(
-                function (gdalResult) {
-                    resolve(gdalResult);
-                },
-                function (reason) {
-                    reject(reason);
-                }
+                workerResult => resolve(workerResult),
+                reason => reject(reason)
             );
 
-            worker.postMessage({
-                id: resolverId,
-                function: name,
-                arguments: args
-            });
+            worker.postMessage({id: resolverId, ...options});
         });
     });
 }
 
-export { initWorker, callWorker };
+// Accessors is a list of accessors operations to run on the dataset defined by dataset.
+function accessFromDataset(accessor, dataset) {
+    return workerTaskPromise({ accessor: accessor, dataset: dataset });
+}
+
+// Run a single function on the worker.
+function runOnWorker(func, args) {
+    return workerTaskPromise({ func, args });
+}
+
+export { initWorker, accessFromDataset, runOnWorker };
