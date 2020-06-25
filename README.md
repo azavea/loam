@@ -105,7 +105,7 @@ A promise which resolves to the affine transform.
 ### `GDALDataset.convert(args)`
 Converts raster data between different formats. This is the equivalent of the [gdal_translate](https://gdal.org/programs/gdal_translate.html) command.
 
-**Note**: This returns a new `GDALDataset` object but does not perform any immediate calculation. Instead, calls to `.convert()` and `.warp()` are evaluated lazily. Each successive call to `.convert()` or `.warp()` is stored in a list of operations on the dataset oboject. These operations are only evaluated when necessary in order to access some property of the dataset, such as its size, bytes, or band count.
+**Note**: This returns a new `GDALDataset` object but does not perform any immediate calculation. Instead, calls to `.convert()` and `.warp()` are evaluated lazily. Each successive call to `.convert()` or `.warp()` is stored in a list of operations on the dataset object. These operations are only evaluated when necessary in order to access some property of the dataset, such as its size, bytes, or band count.
 #### Parameters
 - `args`: An array of strings, each representing a single command-line argument accepted by the `gdal_translate` command. The `src_dataset` and `dst_dataset` parameters should be omitted; these are handled by `GDALDataset`. Example: `ds.convert(['-outsize', '200%', '200%'])`
 #### Return value
@@ -116,7 +116,7 @@ A promise that resolves to a new `GDALDataset`.
 ### `GDALDataset.warp(args)`
 Image reprojection and warping utility. This is the equivalent of the [gdalwarp](https://gdal.org/programs/gdalwarp.html) command.
 
-**Note**: This returns a new `GDALDataset` object but does not perform any immediate calculation. Instead, calls to `.convert()` and `.warp()` are evaluated lazily. Each successive call to `.convert()` or `.warp()` is stored in a list of operations on the dataset oboject. These operations are only evaluated when necessary in order to access some property of the dataset, such as its size, bytes, or band count.
+**Note**: This returns a new `GDALDataset` object but does not perform any immediate calculation. Instead, calls to `.convert()` and `.warp()` are evaluated lazily. Each successive call to `.convert()` or `.warp()` is stored in a list of operations on the dataset object. These operations are only evaluated when necessary in order to access some property of the dataset, such as its size, bytes, or band count.
 #### Parameters
 - `args`: An array of strings, each representing a single [command-line argument](https://gdal.org/programs/gdalwarp.html#synopsis) accepted by the `gdalwarp` command. The `srcfile` and `dstfile` parameters should be omitted; these are handled by `GDALDataset`. Example: `ds.warp(['-s_srs', 'EPSG:3857', '-t_srs', 'EPSG:4326'])`
 #### Return value
