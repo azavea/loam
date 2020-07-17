@@ -1,5 +1,6 @@
 ## Upcoming release
 - Add loam.rasterize() wrapper for GDALRasterize()
+- Add pathPrefix parameter to loam.initialize()
 - Remove closeAndReadBytes(), flushFS(), and convert close() to a no-op.
 - Set up CI and automatic releases via GitHub Actions
 - Package updates to resolve security alerts
