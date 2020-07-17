@@ -4,6 +4,7 @@
 // The wrappers are factories that return functions which perform the necessary setup and
 // teardown for interacting with GDAL inside Emscripten world.
 import wGDALOpen from './wrappers/gdalOpen.js';
+import wGDALRasterize from './wrappers/gdalRasterize.js';
 import wGDALClose from './wrappers/gdalClose.js';
 import wGDALGetRasterCount from './wrappers/gdalGetRasterCount.js';
 import wGDALGetRasterXSize from './wrappers/gdalGetRasterXSize.js';
@@ -70,6 +71,17 @@ self.Module = {
             //
             registry.GDALOpen = wGDALOpen(
                 self.Module.cwrap('GDALOpen', 'number', ['string']),
+                errorHandling,
+                DATASETPATH
+            );
+            registry.GDALRasterize = wGDALRasterize(
+                self.Module.cwrap('GDALRasterize', 'number', [
+                    'string', // Destination dataset path or NULL
+                    'number', // GDALDatasetH destination dataset or NULL
+                    'number', // GDALDatasetH source dataset or NULL
+                    'number', // GDALRasterizeOptions * or NULL
+                    'number' // int * to use for error reporting
+                ]),
                 errorHandling,
                 DATASETPATH
             );
@@ -146,7 +158,7 @@ importScripts('gdal.js');
 
 function handleDatasetAccess(accessor, dataset) {
     // 1: Open the source.
-    let srcDs = registry.GDALOpen(dataset.source);
+    let srcDs = registry[dataset.source.func](dataset.source.src, dataset.source.args);
 
     let resultDs = srcDs;
 

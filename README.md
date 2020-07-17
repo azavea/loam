@@ -49,6 +49,18 @@ A promise that resolves with an instance of `GDALDataset`.
 
 <br />
 
+### `loam.rasterize(geojson, args)`
+Burns vectors in GeoJSON format into rasters. This is the equivalent of the [gdal_rasterize](https://gdal.org/programs/gdal_rasterize.html) command.
+
+**Note**: This returns a new `GDALDataset` object but does not perform any immediate calculation. Instead, calls to `.rasterize()` are evaluated lazily (as with `convert()` and `warp()`, below). The rasterization operation is only evaluated when necessary in order to access some property of the dataset, such as its size, bytes, or band count. Successive calls to `.warp()` and `.convert()` can be lazily chained onto datasets produced via `loam.rasterize()`.
+#### Parameters
+- `geojson`: A Javascript object (_not_ a string) in [GeoJSON](https://en.wikipedia.org/wiki/GeoJSON) format. 
+- `args`: An array of strings, each representing a single command-line argument accepted by the `gdal_rasterize` command. The `src_datasource` and `dst_filename` parameters should be omitted; these are handled internally by Loam. Example (assuming you have a properly structured GeoJSON object): `loam.rasterize(geojson, ['-burn', '1.0', '-of', 'GTiff', '-ts', '200', '200'])`
+#### Return value
+A promise that resolves to a new `GDALDataset`.
+
+<br />
+
 ### `loam.reproject(fromCRS, toCRS, coords)`
 Reproject coordinates from one coordinate system to another using PROJ.4.
 #### Parameters

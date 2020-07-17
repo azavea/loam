@@ -1,15 +1,28 @@
 /* global Module, FS, MEMFS */
 import randomKey from '../randomKey.js';
 import guessFileExtension from '../guessFileExtension.js';
+import { isArrayAllStrings } from '../validation.js';
 
 export default function (GDALRasterize, errorHandling, rootPath) {
-    return function (datasetPtr, args) {
+    return function (geojson, args) {
+        if (!isArrayAllStrings(args)) {
+            throw new Error('All items in the argument list must be strings');
+        }
+        // Make a temporary file location to hold the geojson
+        const geojsonPath = rootPath + randomKey() + '.geojson';
+
+        FS.writeFile(geojsonPath, JSON.stringify(geojson));
+        // Append the geojson path to the args so that it's read as the source.
+        // Open the geojson using GDALOpenEx, which can handle non-raster sources.
+        const datasetPtr = Module.ccall('GDALOpenEx', 'number', ['string'], [geojsonPath]);
+
+        // TODO: Break this out into a util function; this pattern is showing up in several places now.
         // So first, we need to allocate Emscripten heap space sufficient to store each string as a
         // null-terminated C string.
         // Because the C function signature is char **, this array of pointers is going to need to
         // get copied into Emscripten heap space eventually, so we're going to prepare by storing
         // the pointers as a typed array so that we can more easily copy it into heap space later.
-        let argPtrsArray = Uint32Array.from(args.map(argStr => {
+        const argPtrsArray = Uint32Array.from(args.map(argStr => {
             return Module._malloc(Module.lengthBytesUTF8(argStr) + 1); // +1 for the null terminator byte
         }).concat([0]));
         // ^ In addition to each individual argument being null-terminated, the GDAL docs specify that
@@ -42,6 +55,8 @@ export default function (GDALRasterize, errorHandling, rootPath) {
 
         if (optionsErrType === errorHandling.CPLErr.CEFailure ||
           optionsErrType === errorHandling.CPLErr.CEFatal) {
+            Module.ccall('GDALClose', 'number', ['number'], datasetPtr);
+            FS.unlink(geojsonPath);
             Module._free(argPtrsArrayPtr);
             // Don't try to free the null terminator byte
             argPtrsArray.subarray(0, argPtrsArray.length - 1).forEach(ptr => Module._free(ptr));
@@ -58,6 +73,7 @@ export default function (GDALRasterize, errorHandling, rootPath) {
         // through the whole directory structure.
         FS.mount(MEMFS, {}, directory);
         let filename = randomKey(8) + '.' + guessFileExtension(args);
+
         let filePath = directory + '/' + filename;
 
         // And then we can kick off the actual warping process.
@@ -84,6 +100,8 @@ export default function (GDALRasterize, errorHandling, rootPath) {
 
         // The final set of cleanup we need to do, in a function to avoid writing it twice.
         function cleanUp() {
+            Module.ccall('GDALClose', 'number', ['number'], datasetPtr);
+            FS.unlink(geojsonPath);
             Module.ccall('GDALRasterizeOptionsFree', null, ['number'], [rasterizeOptionsPtr]);
             Module._free(argPtrsArrayPtr);
             Module._free(usageErrPtr);
