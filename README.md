@@ -31,12 +31,16 @@ loam.open(blob).then((dataset) => {
 ```
 
 ## Functions
-### `loam.initialize()`
+### `loam.initialize(pathPrefix)`
 Manually set up web worker and initialize Emscripten runtime. This function is called automatically by other functions on `loam`. Returns a promise that is resolved when Loam is fully initialized.
 
 Although this function is called automatically by other functions, such as `loam.open()`, it is often beneficial for user experience to manually call `loam.initialize()`, because it allows pre-fetching Loam's WebAssembly assets (which are several megabytes uncompressed) at a time when the latency required to download them will be least perceptible by the user. For example, `loam.initialize()` could be called when the user clicks a button to open a file-selection dialog, allowing the WebAssembly to load in the background while the user selects a file.
 
 This function is safe to call multiple times.
+#### Parameters
+- `pathPrefix`: The path prefix that Loam should use when downloading its WebAssembly assets. If left undefined, Loam will make a best guess based on the source path of its own `<script>` element. If Loam fails to work properly and you see requests resulting in 404s for the `gdal.*` assets listed above, then you will need to set this parameter so that Loam requests the correct paths for its WebAssembly assets.
+#### Return value
+A promise that resolves when Loam is initialized. All of the functions described in this document wait for this promise's resolution when executing, so paying attention to whether this promise has resolved or not is not required. However, it may be helpful to do so in some circumstances, for example, if you want to display a visual indicator that your app is ready.
 
 <br />
 
@@ -46,6 +50,18 @@ Creates a new GDAL Dataset.
 - `file`: A Blob or File object that should be opened with GDAL. GDAL is compiled with TIFF, PNG, and JPEG support.
 #### Return value
 A promise that resolves with an instance of `GDALDataset`.
+
+<br />
+
+### `loam.rasterize(geojson, args)`
+Burns vectors in GeoJSON format into rasters. This is the equivalent of the [gdal_rasterize](https://gdal.org/programs/gdal_rasterize.html) command.
+
+**Note**: This returns a new `GDALDataset` object but does not perform any immediate calculation. Instead, calls to `.rasterize()` are evaluated lazily (as with `convert()` and `warp()`, below). The rasterization operation is only evaluated when necessary in order to access some property of the dataset, such as its size, bytes, or band count. Successive calls to `.warp()` and `.convert()` can be lazily chained onto datasets produced via `loam.rasterize()`.
+#### Parameters
+- `geojson`: A Javascript object (_not_ a string) in [GeoJSON](https://en.wikipedia.org/wiki/GeoJSON) format. 
+- `args`: An array of strings, each representing a single command-line argument accepted by the `gdal_rasterize` command. The `src_datasource` and `dst_filename` parameters should be omitted; these are handled internally by Loam. Example (assuming you have a properly structured GeoJSON object): `loam.rasterize(geojson, ['-burn', '1.0', '-of', 'GTiff', '-ts', '200', '200'])`
+#### Return value
+A promise that resolves to a new `GDALDataset`.
 
 <br />
 

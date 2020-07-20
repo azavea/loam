@@ -1,8 +1,9 @@
-/* global describe, it, before, afterEach, expect, loam */
+/* global describe, it, before, expect, loam */
 const tinyTifPath = '/base/test/assets/tiny.tif';
 const invalidTifPath = 'base/test/assets/not-a-tiff.bytes';
 const epsg4326 = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]';
 const epsg3857 = 'PROJCS["WGS 84 / Pseudo-Mercator",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Mercator_1SP"],PARAMETER["central_meridian",0],PARAMETER["scale_factor",1],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["X",EAST],AXIS["Y",NORTH],EXTENSION["PROJ4","+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs"],AUTHORITY["EPSG","3857"]]';
+const geojson = {type: 'FeatureCollection', features: [{type: 'Feature', properties: {}, geometry: {type: 'Polygon', coordinates: [[[-75.15416622161865, 39.96212240336062], [-75.15519618988037, 39.96115204441345], [-75.15409111976624, 39.96055173071228], [-75.15339374542236, 39.96149742799007], [-75.15416622161865, 39.96212240336062]]]}}]}
 
 function xhrAsPromiseBlob(url) {
     let xhr = new XMLHttpRequest();
@@ -172,6 +173,16 @@ describe('Given that loam exists', () => {
         });
     });
 
+    describe('calling rasterize', function () {
+        it('should succeed and return a rasterized version of the GeoJSON', function () {
+            return loam.rasterize(geojson, ['-burn', '1', '-of', 'GTiff', '-ts', '10', '10'])
+                .then(ds => ds.bytes())
+                // Byte length was experimentally determined by running gdal_rasterize from the
+                // command-line
+                .then(bytes => expect(bytes.length).to.equal(1166));
+        });
+    });
+
     /**
      * Failure cases
      **/
@@ -230,6 +241,25 @@ describe('Given that loam exists', () => {
         });
     });
 
+    describe('calling rasterize with invalid arguments', function () {
+        it('should fail and return an error message', function () {
+            // The -ts parameter is for output image size, so negative values are nonsensical
+            return loam.rasterize(geojson, ['-burn', '1', '-of', 'GTiff', '-ts', '-10', '10'])
+                .then(ds => ds.bytes()) // Need to call an accessor to trigger operation execution
+                .then(
+                    (result) => {
+                        throw new Error(
+                            'rasterize() promise should have been rejected but got ' +
+                            result + ' instead.'
+                        );
+                    },
+                    error => expect(error.message).to.include(
+                        'Wrong value for -outsize parameter.'
+                    )
+                );
+        });
+    });
+
     describe('calling convert with non-string arguments', function () {
         it('should fail and return an error message', function () {
             return xhrAsPromiseBlob(tinyTifPath)
@@ -260,6 +290,24 @@ describe('Given that loam exists', () => {
                     (result) => {
                         throw new Error(
                             'warp() promise should have been rejected but got ' +
+                            result + ' instead.'
+                        );
+                    },
+                    error => expect(error.message).to.include(
+                        'All items in the argument list must be strings'
+                    )
+                );
+        });
+    });
+
+    describe('calling rasterize with non-string arguments', function () {
+        it('should fail and return an error message', function () {
+            return loam.rasterize(geojson, ['-burn', 1, '-of', 'GTiff', '-ts', 10, 10])
+                .then(ds => ds.bytes()) // Need to call an accessor to trigger operation execution
+                .then(
+                    (result) => {
+                        throw new Error(
+                            'rasterize() promise should have been rejected but got ' +
                             result + ' instead.'
                         );
                     },

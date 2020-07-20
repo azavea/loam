@@ -3,9 +3,15 @@ import { GDALDataset } from './gdalDataset.js';
 
 function open(file) {
     return new Promise((resolve, reject) => {
-        const ds = new GDALDataset(file);
+        const ds = new GDALDataset({func: 'GDALOpen', src: file, args: []});
 
         return ds.open().then(() => resolve(ds), (reason) => reject(reason));
+    });
+}
+
+function rasterize(geojson, args) {
+    return new Promise((resolve, reject) => {
+        resolve(new GDALDataset({func: 'GDALRasterize', src: geojson, args: args}));
     });
 }
 
@@ -16,8 +22,8 @@ function reproject(fromCRS, toCRS, coords) {
     return runOnWorker('LoamReproject', [fromCRS, toCRS, xCoords, yCoords]);
 }
 
-function initialize() {
-    return initWorker();
+function initialize(pathPrefix) {
+    return initWorker(pathPrefix);
 }
 
-export { open, initialize, reproject };
+export { open, rasterize, initialize, reproject };
