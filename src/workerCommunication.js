@@ -18,10 +18,12 @@ function getPathPrefix() {
 }
 
 // Set up a WebWorker and an associated promise that resolves once it's ready
-function initWorker() {
+function initWorker(pathPrefix) {
+    pathPrefix = pathPrefix || getPathPrefix();
+
     if (typeof workerPromise === 'undefined') {
         workerPromise = new Promise(function (resolve, reject) {
-            let _worker = new Worker(getPathPrefix() + 'loam-worker.js');
+            let _worker = new Worker(pathPrefix + 'loam-worker.js');
 
             // The worker needs to do some initialization, and will send a message when it's ready.
             _worker.onmessage = function (msg) {
@@ -39,6 +41,8 @@ function initWorker() {
                         delete messages[msg.data.id];
                     };
                     resolve(_worker);
+                } else if (msg.data.error) {
+                    reject(msg.data.error);
                 }
             };
         });
@@ -57,26 +61,29 @@ function addMessageResolver(callback, errback) {
     return key;
 }
 
-// Call the GDAL API function specified by `name`, with an array of arguments
-function callWorker(name, args) {
+// Send a message to the worker and return a promise that resolves / rejects when a message with
+// a matching id is returned.
+function workerTaskPromise(options) {
     return initWorker().then((worker) => {
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
             let resolverId = addMessageResolver(
-                function (gdalResult) {
-                    resolve(gdalResult);
-                },
-                function (reason) {
-                    reject(reason);
-                }
+                workerResult => resolve(workerResult),
+                reason => reject(reason)
             );
 
-            worker.postMessage({
-                id: resolverId,
-                function: name,
-                arguments: args
-            });
+            worker.postMessage({id: resolverId, ...options});
         });
     });
 }
 
-export { initWorker, callWorker };
+// Accessors is a list of accessors operations to run on the dataset defined by dataset.
+function accessFromDataset(accessor, dataset) {
+    return workerTaskPromise({ accessor: accessor, dataset: dataset });
+}
+
+// Run a single function on the worker.
+function runOnWorker(func, args) {
+    return workerTaskPromise({ func, args });
+}
+
+export { initWorker, accessFromDataset, runOnWorker };

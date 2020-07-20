@@ -52,6 +52,6 @@
     "yargs": "^14.0.0"
   },
   "dependencies": {
-    "gdal-js": "^1.1.0"
+    "gdal-js": "2.0.0"
   }
 }

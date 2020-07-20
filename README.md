@@ -27,17 +27,20 @@ loam.initialize();
 // Assuming you have a `Blob` object from somewhere. `File` objects also work.
 loam.open(blob).then((dataset) => {
   dataset.width()
-    .then((width) => /* do stuff with width */)
-    .then(() => dataset.close()); // It's important to close datasets after you're done with them
+    .then((width) => /* do stuff with width */);
 ```
 
 ## Functions
-### `loam.initialize()`
+### `loam.initialize(pathPrefix)`
 Manually set up web worker and initialize Emscripten runtime. This function is called automatically by other functions on `loam`. Returns a promise that is resolved when Loam is fully initialized.
 
 Although this function is called automatically by other functions, such as `loam.open()`, it is often beneficial for user experience to manually call `loam.initialize()`, because it allows pre-fetching Loam's WebAssembly assets (which are several megabytes uncompressed) at a time when the latency required to download them will be least perceptible by the user. For example, `loam.initialize()` could be called when the user clicks a button to open a file-selection dialog, allowing the WebAssembly to load in the background while the user selects a file.
 
 This function is safe to call multiple times.
+#### Parameters
+- `pathPrefix`: The path prefix that Loam should use when downloading its WebAssembly assets. If left undefined, Loam will make a best guess based on the source path of its own `<script>` element. If Loam fails to work properly and you see requests resulting in 404s for the `gdal.*` assets listed above, then you will need to set this parameter so that Loam requests the correct paths for its WebAssembly assets.
+#### Return value
+A promise that resolves when Loam is initialized. All of the functions described in this document wait for this promise's resolution when executing, so paying attention to whether this promise has resolved or not is not required. However, it may be helpful to do so in some circumstances, for example, if you want to display a visual indicator that your app is ready.
 
 <br />
 
@@ -47,6 +50,18 @@ Creates a new GDAL Dataset.
 - `file`: A Blob or File object that should be opened with GDAL. GDAL is compiled with TIFF, PNG, and JPEG support.
 #### Return value
 A promise that resolves with an instance of `GDALDataset`.
+
+<br />
+
+### `loam.rasterize(geojson, args)`
+Burns vectors in GeoJSON format into rasters. This is the equivalent of the [gdal_rasterize](https://gdal.org/programs/gdal_rasterize.html) command.
+
+**Note**: This returns a new `GDALDataset` object but does not perform any immediate calculation. Instead, calls to `.rasterize()` are evaluated lazily (as with `convert()` and `warp()`, below). The rasterization operation is only evaluated when necessary in order to access some property of the dataset, such as its size, bytes, or band count. Successive calls to `.warp()` and `.convert()` can be lazily chained onto datasets produced via `loam.rasterize()`.
+#### Parameters
+- `geojson`: A Javascript object (_not_ a string) in [GeoJSON](https://en.wikipedia.org/wiki/GeoJSON) format. 
+- `args`: An array of strings, each representing a single command-line argument accepted by the `gdal_rasterize` command. The `src_datasource` and `dst_filename` parameters should be omitted; these are handled internally by Loam. Example (assuming you have a properly structured GeoJSON object): `loam.rasterize(geojson, ['-burn', '1.0', '-of', 'GTiff', '-ts', '200', '200'])`
+#### Return value
+A promise that resolves to a new `GDALDataset`.
 
 <br />
 
@@ -62,16 +77,9 @@ A promise that resolves with an array of transformed coordinate pairs.
 <br />
 
 ### `GDALDataset.close()`
-Closes the dataset and cleans up its associated resources. Currently, Loam is subject to memory leaks if this function is not called to clean up unused GDALDatasets. A future goal is to eliminate the need for this.
+This used to be required in order to avoid memory leaks in earlier versions of Loam, but is currently a no-op. It has been maintained to preserve backwards compatibility, but has no effect other than to display a console warning.
 #### Return value
-A promise that resolves when the dataset has been closed and cleaned up.
-
-<br />
-
-### `GDALDataset.closeAndReadBytes()`
-Behaves the same as `GDALDataset.close()`, except that the promise returned is resolved with the contents of the dataset, as a byte array.
-#### Return value
-A promise that resolves when the dataset has been closed. The promise contains the dataset contents as a byte array.
+A promise that resolves immediately with an empty list (for historical reasons).
 
 <br />
 
@@ -113,22 +121,22 @@ A promise which resolves to the affine transform.
 ### `GDALDataset.convert(args)`
 Converts raster data between different formats. This is the equivalent of the [gdal_translate](https://gdal.org/programs/gdal_translate.html) command.
 
-**Note**: This returns a new `GDALDataset` object. It is necessary to call `.close()` on both the original dataset _and_ the new dataset in order to avoid memory leaks.
+**Note**: This returns a new `GDALDataset` object but does not perform any immediate calculation. Instead, calls to `.convert()` and `.warp()` are evaluated lazily. Each successive call to `.convert()` or `.warp()` is stored in a list of operations on the dataset object. These operations are only evaluated when necessary in order to access some property of the dataset, such as its size, bytes, or band count.
 #### Parameters
 - `args`: An array of strings, each representing a single command-line argument accepted by the `gdal_translate` command. The `src_dataset` and `dst_dataset` parameters should be omitted; these are handled by `GDALDataset`. Example: `ds.convert(['-outsize', '200%', '200%'])`
 #### Return value
-A promise that resolves to a new `GDALDataset` which has been converted according to the provided arguments to `gdal_translate`.
+A promise that resolves to a new `GDALDataset`.
 
 <br />
 
 ### `GDALDataset.warp(args)`
 Image reprojection and warping utility. This is the equivalent of the [gdalwarp](https://gdal.org/programs/gdalwarp.html) command.
 
-**Note**: This returns a new `GDALDataset` object. It is necessary to call `.close()` on both the original dataset _and_ the new dataset in order to avoid memory leaks.
+**Note**: This returns a new `GDALDataset` object but does not perform any immediate calculation. Instead, calls to `.convert()` and `.warp()` are evaluated lazily. Each successive call to `.convert()` or `.warp()` is stored in a list of operations on the dataset object. These operations are only evaluated when necessary in order to access some property of the dataset, such as its size, bytes, or band count.
 #### Parameters
 - `args`: An array of strings, each representing a single [command-line argument](https://gdal.org/programs/gdalwarp.html#synopsis) accepted by the `gdalwarp` command. The `srcfile` and `dstfile` parameters should be omitted; these are handled by `GDALDataset`. Example: `ds.warp(['-s_srs', 'EPSG:3857', '-t_srs', 'EPSG:4326'])`
 #### Return value
-A promise that resolves to a new `GDALDataset` which has been reprojected according to the provided arguments to `gdalwarp`.
+A promise that resolves to a new `GDALDataset`.
 
 # Developing
 
