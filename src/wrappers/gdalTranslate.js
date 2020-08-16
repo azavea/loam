@@ -6,18 +6,37 @@ import ParamParser from '../stringParamAllocator.js';
 export default function (GDALTranslate, errorHandling, rootPath) {
     // Args is expected to be an array of strings that could function as arguments to gdal_translate
     return function (dataset, args) {
-        let params = new ParamParser(args, errorHandling);
+        let params = new ParamParser(args);
+
+        params.allocate();
 
         // Whew, all finished. argPtrsArrayPtr is now the address of the start of the list of
         // pointers in Emscripten heap space. Each pointer identifies the address of the start of a
         // parameter string, also stored in heap space. This is the direct equivalent of a char **,
         // which is what GDALTranslateOptionsNew requires.
-        let translateOptionsPtr = Module.ccall('GDALTranslateOptionsNew', 'number',
+        let translateOptionsPtr = Module.ccall(
+            'GDALTranslateOptionsNew',
+            'number',
             ['number', 'number'],
             [params.argPtrsArrayPtr, null]
         );
 
-        params.validateOptions();
+        // Validate that the options were correct
+        let optionsErrType = errorHandling.CPLGetLastErrorType();
+
+        if (
+            optionsErrType === errorHandling.CPLErr.CEFailure ||
+      optionsErrType === errorHandling.CPLErr.CEFatal
+        ) {
+            Module._free(params.argPtrsArrayPtr);
+            // Don't try to free the null terminator byte
+            params.argPtrsArray
+                .subarray(0, params.argPtrsArray.length - 1)
+                .forEach((ptr) => Module._free(ptr));
+            const message = errorHandling.CPLGetLastErrorMsg();
+
+            throw new Error(message);
+        }
 
         // Now that we have our translate options, we need to make a file location to hold the output.
         let directory = rootPath + '/' + randomKey();
@@ -39,16 +58,35 @@ export default function (GDALTranslate, errorHandling, rootPath) {
         let usageErrPtr = Module._malloc(Int32Array.BYTES_PER_ELEMENT);
 
         Module.setValue(usageErrPtr, 0, 'i32');
-        let newDatasetPtr = GDALTranslate(filePath, dataset, translateOptionsPtr, usageErrPtr);
+        let newDatasetPtr = GDALTranslate(
+            filePath,
+            dataset,
+            translateOptionsPtr,
+            usageErrPtr
+        );
 
         let errorType = errorHandling.CPLGetLastErrorType();
         // If we ever want to use the usage error pointer:
         // let usageErr = Module.getValue(usageErrPtr, 'i32');
 
+        // The final set of cleanup we need to do, in a function to avoid writing it twice.
+        function cleanUp() {
+            Module.ccall(
+                'GDALTranslateOptionsFree',
+                null,
+                ['number'],
+                [translateOptionsPtr]
+            );
+            Module._free(usageErrPtr);
+            params.deallocate();
+        }
+
         // Check for errors; clean up and throw if error is detected
-        if (errorType === errorHandling.CPLErr.CEFailure ||
-                errorType === errorHandling.CPLErr.CEFatal) {
-            params.cleanUp('GDALTranslateOptionsFree', translateOptionsPtr, usageErrPtr);
+        if (
+            errorType === errorHandling.CPLErr.CEFailure ||
+      errorType === errorHandling.CPLErr.CEFatal
+        ) {
+            cleanUp();
             const message = errorHandling.CPLGetLastErrorMsg();
 
             throw new Error(message);
@@ -60,8 +98,7 @@ export default function (GDALTranslate, errorHandling, rootPath) {
                 filename: filename
             };
 
-            params.cleanUp('GDALTranslateOptionsFree', translateOptionsPtr, usageErrPtr);
-
+            cleanUp();
             return result;
         }
     };
