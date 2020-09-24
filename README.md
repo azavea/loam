@@ -145,3 +145,7 @@ After cloning,
 2. `yarn dev` and in another session `yarn test:watch`
 
 Built assets are placed in `lib`.
+
+# Contributing
+
+Contributions are welcomed! Please feel free to work on any of the open issues or open an issue describing the changes you'd like to make. All contributions will be licensed under the Apache License, as per the [GitHub Terms of Service](https://docs.github.com/en/github/site-policy/github-terms-of-service#6-contributions-under-repository-license).
