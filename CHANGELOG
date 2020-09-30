@@ -1,5 +1,6 @@
 ## Upcoming release
 - Add information on contributing to the README
+- Apply code auto-formatting
 
 ## 1.0.0-rc.1 (2020-07-24)
 - Add loam.rasterize() wrapper for GDALRasterize()

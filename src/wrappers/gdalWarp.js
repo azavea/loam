@@ -26,7 +26,7 @@ export default function (GDALWarp, errorHandling, rootPath) {
 
         if (
             optionsErrType === errorHandling.CPLErr.CEFailure ||
-      optionsErrType === errorHandling.CPLErr.CEFatal
+            optionsErrType === errorHandling.CPLErr.CEFatal
         ) {
             params.deallocate();
             const message = errorHandling.CPLGetLastErrorMsg();
@@ -70,12 +70,7 @@ export default function (GDALWarp, errorHandling, rootPath) {
 
         // The final set of cleanup we need to do, in a function to avoid writing it twice.
         function cleanUp() {
-            Module.ccall(
-                'GDALWarpAppOptionsFree',
-                null,
-                ['number'],
-                [warpAppOptionsPtr]
-            );
+            Module.ccall('GDALWarpAppOptionsFree', null, ['number'], [warpAppOptionsPtr]);
             Module._free(usageErrPtr);
             params.deallocate();
         }
@@ -87,7 +82,7 @@ export default function (GDALWarp, errorHandling, rootPath) {
         // Check for errors; clean up and throw if error is detected
         if (
             errorType === errorHandling.CPLErr.CEFailure ||
-      errorType === errorHandling.CPLErr.CEFatal
+            errorType === errorHandling.CPLErr.CEFatal
         ) {
             cleanUp();
             const message = errorHandling.CPLGetLastErrorMsg();
@@ -98,7 +93,7 @@ export default function (GDALWarp, errorHandling, rootPath) {
                 datasetPtr: newDatasetPtr,
                 filePath: filePath,
                 directory: directory,
-                filename: filename
+                filename: filename,
             };
 
             cleanUp();

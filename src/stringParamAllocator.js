@@ -34,22 +34,13 @@ export default class ParamParser {
         // Next, we need to write each string from the JS string array into the Emscripten heap space
         // we've allocated for it.
         self.args.forEach(function (argStr, i) {
-            Module.stringToUTF8(
-                argStr,
-                argPtrsArray[i],
-                Module.lengthBytesUTF8(argStr) + 1
-            );
+            Module.stringToUTF8(argStr, argPtrsArray[i], Module.lengthBytesUTF8(argStr) + 1);
         });
 
         // Now, as mentioned above, we also need to copy the pointer array itself into heap space.
-        let argPtrsArrayPtr = Module._malloc(
-            argPtrsArray.length * argPtrsArray.BYTES_PER_ELEMENT
-        );
+        let argPtrsArrayPtr = Module._malloc(argPtrsArray.length * argPtrsArray.BYTES_PER_ELEMENT);
 
-        Module.HEAPU32.set(
-            argPtrsArray,
-            argPtrsArrayPtr / argPtrsArray.BYTES_PER_ELEMENT
-        );
+        Module.HEAPU32.set(argPtrsArray, argPtrsArrayPtr / argPtrsArray.BYTES_PER_ELEMENT);
 
         self.argPtrsArray = argPtrsArray;
         self.argPtrsArrayPtr = argPtrsArrayPtr;
@@ -66,5 +57,4 @@ export default class ParamParser {
         delete self.argPtrsArray;
         delete self.argPtrsArrayPtr;
     }
-
 }

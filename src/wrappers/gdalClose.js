@@ -14,8 +14,10 @@ export default function (GDALClose, errorHandling) {
         let errorType = errorHandling.CPLGetLastErrorType();
 
         // Check for errors; throw if error is detected
-        if (errorType === errorHandling.CPLErr.CEFailure ||
-                errorType === errorHandling.CPLErr.CEFatal) {
+        if (
+            errorType === errorHandling.CPLErr.CEFailure ||
+            errorType === errorHandling.CPLErr.CEFatal
+        ) {
             let message = errorHandling.CPLGetLastErrorMsg();
 
             throw new Error(message);
@@ -24,4 +26,3 @@ export default function (GDALClose, errorHandling) {
         }
     };
 }
-
