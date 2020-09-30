@@ -23,16 +23,17 @@ export default class ParamParser {
         let argPtrsArray = Uint32Array.from(
             self.args
                 .map((argStr) => {
-                    return Module._malloc(Module.lengthBytesUTF8(argStr) + 1); // +1 for the null terminator byte
+                    // +1 for the null terminator byte
+                    return Module._malloc(Module.lengthBytesUTF8(argStr) + 1);
                 })
                 .concat([0])
         );
-        // ^ In addition to each individual argument being null-terminated, the GDAL docs specify that
-        // GDALTranslateOptionsNew takes its options passed in as a null-terminated array of
+        // ^ In addition to each individual argument being null-terminated, the GDAL docs specify
+        // that GDALTranslateOptionsNew takes its options passed in as a null-terminated array of
         // pointers, so we have to add on a null (0) byte at the end.
 
-        // Next, we need to write each string from the JS string array into the Emscripten heap space
-        // we've allocated for it.
+        // Next, we need to write each string from the JS string array into the Emscripten heap
+        // space we've allocated for it.
         self.args.forEach(function (argStr, i) {
             Module.stringToUTF8(argStr, argPtrsArray[i], Module.lengthBytesUTF8(argStr) + 1);
         });
