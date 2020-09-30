@@ -26,7 +26,7 @@ export default function (GDALTranslate, errorHandling, rootPath) {
 
         if (
             optionsErrType === errorHandling.CPLErr.CEFailure ||
-      optionsErrType === errorHandling.CPLErr.CEFatal
+            optionsErrType === errorHandling.CPLErr.CEFatal
         ) {
             params.deallocate();
             const message = errorHandling.CPLGetLastErrorMsg();
@@ -54,12 +54,7 @@ export default function (GDALTranslate, errorHandling, rootPath) {
         let usageErrPtr = Module._malloc(Int32Array.BYTES_PER_ELEMENT);
 
         Module.setValue(usageErrPtr, 0, 'i32');
-        let newDatasetPtr = GDALTranslate(
-            filePath,
-            dataset,
-            translateOptionsPtr,
-            usageErrPtr
-        );
+        let newDatasetPtr = GDALTranslate(filePath, dataset, translateOptionsPtr, usageErrPtr);
 
         let errorType = errorHandling.CPLGetLastErrorType();
         // If we ever want to use the usage error pointer:
@@ -67,12 +62,7 @@ export default function (GDALTranslate, errorHandling, rootPath) {
 
         // The final set of cleanup we need to do, in a function to avoid writing it twice.
         function cleanUp() {
-            Module.ccall(
-                'GDALTranslateOptionsFree',
-                null,
-                ['number'],
-                [translateOptionsPtr]
-            );
+            Module.ccall('GDALTranslateOptionsFree', null, ['number'], [translateOptionsPtr]);
             Module._free(usageErrPtr);
             params.deallocate();
         }
@@ -80,7 +70,7 @@ export default function (GDALTranslate, errorHandling, rootPath) {
         // Check for errors; clean up and throw if error is detected
         if (
             errorType === errorHandling.CPLErr.CEFailure ||
-      errorType === errorHandling.CPLErr.CEFatal
+            errorType === errorHandling.CPLErr.CEFatal
         ) {
             cleanUp();
             const message = errorHandling.CPLGetLastErrorMsg();
@@ -91,7 +81,7 @@ export default function (GDALTranslate, errorHandling, rootPath) {
                 datasetPtr: newDatasetPtr,
                 filePath: filePath,
                 directory: directory,
-                filename: filename
+                filename: filename,
             };
 
             cleanUp();

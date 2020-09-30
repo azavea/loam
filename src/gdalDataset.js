@@ -50,19 +50,30 @@ export class GDALDataset {
 
     convert(args) {
         return new Promise((resolve, reject) => {
-            resolve(new GDALDataset(this.source, this.operations.concat(new DatasetOperation('GDALTranslate', args))));
+            resolve(
+                new GDALDataset(
+                    this.source,
+                    this.operations.concat(new DatasetOperation('GDALTranslate', args))
+                )
+            );
         });
     }
 
     warp(args) {
         return new Promise((resolve, reject) => {
-            resolve(new GDALDataset(this.source, this.operations.concat(new DatasetOperation('GDALWarp', args))));
+            resolve(
+                new GDALDataset(
+                    this.source,
+                    this.operations.concat(new DatasetOperation('GDALWarp', args))
+                )
+            );
         });
     }
 
     close() {
         return new Promise((resolve, reject) => {
-            const warningMsg = 'It is not necessary to call close() on a Loam dataset. This is a no-op';
+            const warningMsg =
+                'It is not necessary to call close() on a Loam dataset. This is a no-op';
 
             console.warn(warningMsg);
             resolve([]);

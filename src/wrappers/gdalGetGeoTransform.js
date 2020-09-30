@@ -26,8 +26,10 @@ export default function (GDALGetGeoTransform, errorHandling) {
         let errorType = errorHandling.CPLGetLastErrorType();
 
         // Check for errors; clean up and throw if error is detected
-        if (errorType === errorHandling.CPLErr.CEFailure ||
-                errorType === errorHandling.CPLErr.CEFatal) {
+        if (
+            errorType === errorHandling.CPLErr.CEFailure ||
+            errorType === errorHandling.CPLErr.CEFatal
+        ) {
             Module._free(byteOffset);
             let message = errorHandling.CPLGetLastErrorMsg();
 

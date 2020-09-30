@@ -30,30 +30,42 @@ let errorHandling = {
         CEDebug: 1,
         CEWarning: 2,
         CEFailure: 3,
-        CEFatal: 4
+        CEFatal: 4,
     },
     // These will be populated by onRuntimeInitialized, below
     CPLErrorReset: null,
     CPLGetLastErrorMsg: null,
     CPLGetLastErrorNo: null,
-    CPLGetLastErrorType: null
+    CPLGetLastErrorType: null,
 };
 
 self.Module = {
-    'print': function (text) { console.log('stdout: ' + text); },
-    'printErr': function (text) { console.log('stderr: ' + text); },
+    print: function (text) {
+        console.log('stdout: ' + text);
+    },
+    printErr: function (text) {
+        console.log('stderr: ' + text);
+    },
     // Optimized builds contain a .js.mem file which is loaded asynchronously;
     // this waits until that has finished before performing further setup.
-    'onRuntimeInitialized': function () {
+    onRuntimeInitialized: function () {
         try {
             // Initialize GDAL
             self.Module.ccall('GDALAllRegister', null, [], []);
 
             // Set up error handling
             errorHandling.CPLErrorReset = self.Module.cwrap('CPLErrorReset', null, []);
-            errorHandling.CPLGetLastErrorMsg = self.Module.cwrap('CPLGetLastErrorMsg', 'string', []);
+            errorHandling.CPLGetLastErrorMsg = self.Module.cwrap(
+                'CPLGetLastErrorMsg',
+                'string',
+                []
+            );
             errorHandling.CPLGetLastErrorNo = self.Module.cwrap('CPLGetLastErrorNo', 'number', []);
-            errorHandling.CPLGetLastErrorType = self.Module.cwrap('CPLGetLastErrorType', 'number', []);
+            errorHandling.CPLGetLastErrorType = self.Module.cwrap(
+                'CPLGetLastErrorType',
+                'number',
+                []
+            );
             // Get a "function pointer" to the built-in quiet error handler so that errors don't
             // cause tons of console noise.
             const cplQuietFnPtr = addFunction(
@@ -80,7 +92,7 @@ self.Module = {
                     'number', // GDALDatasetH destination dataset or NULL
                     'number', // GDALDatasetH source dataset or NULL
                     'number', // GDALRasterizeOptions * or NULL
-                    'number' // int * to use for error reporting
+                    'number', // int * to use for error reporting
                 ]),
                 errorHandling,
                 DATASETPATH
@@ -106,9 +118,7 @@ self.Module = {
                 errorHandling
             );
             registry.GDALGetGeoTransform = wGDALGetGeoTransform(
-                self.Module.cwrap('GDALGetGeoTransform', 'number', [
-                    'number', 'number'
-                ]),
+                self.Module.cwrap('GDALGetGeoTransform', 'number', ['number', 'number']),
                 errorHandling
             );
             registry.GDALTranslate = wGDALTranslate(
@@ -116,7 +126,7 @@ self.Module = {
                     'string', // Output path
                     'number', // GDALDatasetH source dataset
                     'number', // GDALTranslateOptions *
-                    'number' // int * to use for error reporting
+                    'number', // int * to use for error reporting
                 ]),
                 errorHandling,
                 DATASETPATH
@@ -128,7 +138,7 @@ self.Module = {
                     'number', // Number of input datasets
                     'number', // GDALDatasetH * list of source datasets
                     'number', // GDALWarpAppOptions *
-                    'number' // int * to use for error reporting
+                    'number', // int * to use for error reporting
                 ]),
                 errorHandling,
                 DATASETPATH
@@ -136,7 +146,7 @@ self.Module = {
             registry.LoamFlushFS = function () {
                 let datasetFolders = FS.lookupPath(DATASETPATH).node.contents;
 
-                Object.values(datasetFolders).forEach(node => {
+                Object.values(datasetFolders).forEach((node) => {
                     FS.unmount(FS.getPath(node));
                     FS.rmdir(FS.getPath(node));
                 });
@@ -144,12 +154,12 @@ self.Module = {
             };
             registry.LoamReproject = wReproject;
             initialized = true;
-            postMessage({ready: true});
+            postMessage({ ready: true });
         } catch (error) {
             console.error(error);
-            postMessage({error: error});
+            postMessage({ error: error });
         }
-    }
+    },
 };
 
 // Load gdal.js. This will populate the Module object, and then call
@@ -168,7 +178,7 @@ function handleDatasetAccess(accessor, dataset) {
     // 3. Close open dataset, delete files.
     // 4. If forther operations, back to 2, otherwise pass open dataset along so the data can be
     // accessed.
-    for (const {func: op, args: args} of dataset.operations) {
+    for (const { func: op, args: args } of dataset.operations) {
         resultDs = registry[op](srcDs.datasetPtr, args);
         registry.GDALClose(srcDs.datasetPtr, srcDs.directory, srcDs.filePath);
         srcDs = resultDs;
@@ -177,7 +187,12 @@ function handleDatasetAccess(accessor, dataset) {
     let result;
 
     if (accessor === 'LoamReadBytes') {
-        result = registry.GDALClose(resultDs.datasetPtr, resultDs.directory, resultDs.filePath, true);
+        result = registry.GDALClose(
+            resultDs.datasetPtr,
+            resultDs.directory,
+            resultDs.filePath,
+            true
+        );
     } else if (accessor) {
         result = registry[accessor](resultDs.datasetPtr);
         registry.GDALClose(resultDs.datasetPtr, resultDs.directory, resultDs.filePath, false);
@@ -197,7 +212,11 @@ function handleFunctionCall(func, args) {
 
 onmessage = function (msg) {
     if (!initialized) {
-        postMessage({success: false, message: 'Runtime not yet initialized', id: msg.data.id});
+        postMessage({
+            success: false,
+            message: 'Runtime not yet initialized',
+            id: msg.data.id,
+        });
         return;
     }
     try {
@@ -210,21 +229,22 @@ onmessage = function (msg) {
         } else {
             postMessage({
                 success: false,
-                message: 'Worker could not parse message: either func + args or accessor + dataset is required',
-                id: msg.data.id
+                message:
+                    'Worker could not parse message: either func + args or accessor + dataset is required',
+                id: msg.data.id,
             });
             return;
         }
         postMessage({
             success: true,
             result: result,
-            id: msg.data.id
+            id: msg.data.id,
         });
     } catch (error) {
         postMessage({
             success: false,
             message: error.message,
-            id: msg.data.id
+            id: msg.data.id,
         });
     }
 };

@@ -13,12 +13,7 @@ export default function (GDALRasterize, errorHandling, rootPath) {
         FS.writeFile(geojsonPath, JSON.stringify(geojson));
         // Append the geojson path to the args so that it's read as the source.
         // Open the geojson using GDALOpenEx, which can handle non-raster sources.
-        const datasetPtr = Module.ccall(
-            'GDALOpenEx',
-            'number',
-            ['string'],
-            [geojsonPath]
-        );
+        const datasetPtr = Module.ccall('GDALOpenEx', 'number', ['string'], [geojsonPath]);
 
         params.allocate();
 
@@ -85,12 +80,7 @@ export default function (GDALRasterize, errorHandling, rootPath) {
         function cleanUp() {
             Module.ccall('GDALClose', 'number', ['number'], datasetPtr);
             FS.unlink(geojsonPath);
-            Module.ccall(
-                'GDALRasterizeOptionsFree',
-                null,
-                ['number'],
-                [rasterizeOptionsPtr]
-            );
+            Module.ccall('GDALRasterizeOptionsFree', null, ['number'], [rasterizeOptionsPtr]);
             Module._free(usageErrPtr);
             params.deallocate();
         }
@@ -98,7 +88,7 @@ export default function (GDALRasterize, errorHandling, rootPath) {
         // Check for errors; clean up and throw if error is detected
         if (
             errorType === errorHandling.CPLErr.CEFailure ||
-      errorType === errorHandling.CPLErr.CEFatal
+            errorType === errorHandling.CPLErr.CEFatal
         ) {
             cleanUp();
             const message = errorHandling.CPLGetLastErrorMsg();
@@ -109,7 +99,7 @@ export default function (GDALRasterize, errorHandling, rootPath) {
                 datasetPtr: newDatasetPtr,
                 filePath: filePath,
                 directory: directory,
-                filename: filename
+                filename: filename,
             };
 
             cleanUp();

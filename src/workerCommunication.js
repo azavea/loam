@@ -11,10 +11,7 @@ const THIS_SCRIPT = _scripts[_scripts.length - 1];
 
 // Inspired by Emscripten's method for doing the same thing
 function getPathPrefix() {
-    return THIS_SCRIPT.src.substring(
-        0,
-        THIS_SCRIPT.src.lastIndexOf('/')
-    ) + '/';
+    return THIS_SCRIPT.src.substring(0, THIS_SCRIPT.src.lastIndexOf('/')) + '/';
 }
 
 // Set up a WebWorker and an associated promise that resolves once it's ready
@@ -67,11 +64,11 @@ function workerTaskPromise(options) {
     return initWorker().then((worker) => {
         return new Promise((resolve, reject) => {
             let resolverId = addMessageResolver(
-                workerResult => resolve(workerResult),
-                reason => reject(reason)
+                (workerResult) => resolve(workerResult),
+                (reason) => reject(reason)
             );
 
-            worker.postMessage({id: resolverId, ...options});
+            worker.postMessage({ id: resolverId, ...options });
         });
     });
 }
