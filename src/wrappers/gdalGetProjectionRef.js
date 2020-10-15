@@ -11,7 +11,7 @@ export default function (GDALGetProjectionRef, errorHandling) {
         ) {
             let message = errorHandling.CPLGetLastErrorMsg();
 
-            throw new Error(message);
+            throw new Error('Error in GDALGetProjectionRef: ' + message);
         } else {
             return result;
         }

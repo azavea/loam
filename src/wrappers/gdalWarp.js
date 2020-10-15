@@ -31,10 +31,10 @@ export default function (GDALWarp, errorHandling, rootPath) {
             params.deallocate();
             const message = errorHandling.CPLGetLastErrorMsg();
 
-            throw new Error(message);
+            throw new Error('Error in GDALWarp: ' + message);
         }
 
-        let directory = rootPath + '/' + randomKey();
+        let directory = rootPath + randomKey();
 
         FS.mkdir(directory);
         // This makes it easier to remove later because we can just unmount rather than recursing
@@ -58,7 +58,8 @@ export default function (GDALWarp, errorHandling, rootPath) {
         // at a time, we don't need to do anything fancy here.
         let datasetListPtr = Module._malloc(4); // 32-bit pointer
 
-        Module.setValue(datasetListPtr, dataset, '*'); // Set datasetListPtr to the address of dataset
+        // Set datasetListPtr to the address of dataset
+        Module.setValue(datasetListPtr, dataset, '*');
         let newDatasetPtr = GDALWarp(
             filePath, // Output
             0, // NULL because filePath is not NULL
@@ -87,7 +88,7 @@ export default function (GDALWarp, errorHandling, rootPath) {
             cleanUp();
             const message = errorHandling.CPLGetLastErrorMsg();
 
-            throw new Error(message);
+            throw new Error('Error in GDALWarp: ' + message);
         } else {
             const result = {
                 datasetPtr: newDatasetPtr,

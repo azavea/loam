@@ -11,7 +11,7 @@ export default function (GDALGetRasterCount, errorHandling) {
         ) {
             let message = errorHandling.CPLGetLastErrorMsg();
 
-            throw new Error(message);
+            throw new Error('Error in GDALGetRasterCount: ' + message);
         } else {
             return result;
         }
