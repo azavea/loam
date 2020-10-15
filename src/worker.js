@@ -6,6 +6,7 @@
 import wGDALOpen from './wrappers/gdalOpen.js';
 import wGDALRasterize from './wrappers/gdalRasterize.js';
 import wGDALClose from './wrappers/gdalClose.js';
+import wGDALDEMProcessing from './wrappers/gdalDemProcessing.js';
 import wGDALGetRasterCount from './wrappers/gdalGetRasterCount.js';
 import wGDALGetRasterXSize from './wrappers/gdalGetRasterXSize.js';
 import wGDALGetRasterYSize from './wrappers/gdalGetRasterYSize.js';
@@ -143,6 +144,19 @@ self.Module = {
                 errorHandling,
                 DATASETPATH
             );
+            registry.GDALDEMProcessing = wGDALDEMProcessing(
+                self.Module.cwrap('GDALDEMProcessing', 'number', [
+                    'string', // Destination dataset path or NULL
+                    'number', // GDALDatasetH destination dataset
+                    // eslint-disable-next-line max-len
+                    'string', // The processing to apply (one of "hillshade", "slope", "aspect", "color-relief", "TRI", "TPI", "roughness")
+                    'string', // Color file path (when previous is "hillshade") or NULL (otherwise)
+                    'number', // GDALDEMProcessingOptions *
+                    'number', // int * to use for error reporting
+                ]),
+                errorHandling,
+                DATASETPATH
+            );
             registry.LoamFlushFS = function () {
                 let datasetFolders = FS.lookupPath(DATASETPATH).node.contents;
 
@@ -230,6 +244,7 @@ onmessage = function (msg) {
             postMessage({
                 success: false,
                 message:
+                // eslint-disable-next-line max-len
                     'Worker could not parse message: either func + args or accessor + dataset is required',
                 id: msg.data.id,
             });
