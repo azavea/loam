@@ -11,7 +11,7 @@ export default function (GDALGetRasterXSize, errorHandling) {
         ) {
             let message = errorHandling.CPLGetLastErrorMsg();
 
-            throw new Error(message);
+            throw new Error('Error in GDALGetRasterXSize: ' + message);
         } else {
             return result;
         }

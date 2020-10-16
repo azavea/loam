@@ -40,11 +40,12 @@ export default function (GDALRasterize, errorHandling, rootPath) {
             params.deallocate();
             const message = errorHandling.CPLGetLastErrorMsg();
 
-            throw new Error(message);
+            throw new Error('Error in GDALRasterize: ' + message);
         }
 
-        // Now that we have our translate options, we need to make a file location to hold the output.
-        let directory = rootPath + '/' + randomKey();
+        // Now that we have our translate options, we need to make a file location to hold the
+        // output.
+        let directory = rootPath + randomKey();
 
         FS.mkdir(directory);
         // This makes it easier to remove later because we can just unmount rather than recursing
@@ -93,7 +94,7 @@ export default function (GDALRasterize, errorHandling, rootPath) {
             cleanUp();
             const message = errorHandling.CPLGetLastErrorMsg();
 
-            throw new Error(message);
+            throw new Error('Error in GDALRasterize: ' + message);
         } else {
             const result = {
                 datasetPtr: newDatasetPtr,

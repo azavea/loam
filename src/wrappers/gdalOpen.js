@@ -31,7 +31,7 @@ export default function (GDALOpen, errorHandling, rootPath) {
             FS.rmdir(directory);
             let message = errorHandling.CPLGetLastErrorMsg();
 
-            throw new Error(message);
+            throw new Error('Error in GDALOpen: ' + message);
         } else {
             return {
                 datasetPtr: datasetPtr,

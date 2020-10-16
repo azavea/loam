@@ -1,5 +1,6 @@
 /* global describe, it, before, expect, loam */
 const tinyTifPath = '/base/test/assets/tiny.tif';
+const tinyDEMPath = '/base/test/assets/tiny_dem.tif';
 const invalidTifPath = 'base/test/assets/not-a-tiff.bytes';
 const epsg4326 =
     'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]';
@@ -218,6 +219,32 @@ describe('Given that loam exists', () => {
         });
     });
 
+    describe('calling render with color-relief', function () {
+        it('should succeed and return a rendered version of the GeoTIFF', function () {
+            return (
+                xhrAsPromiseBlob(tinyDEMPath)
+                    .then((tifBlob) => loam.open(tifBlob))
+                    .then((ds) => ds.render('color-relief', ['-of', 'PNG'], ['993.0 255 0 0']))
+                    .then((ds) => ds.bytes())
+                    // Determined out-of-band by executing gdaldem on the command line.
+                    .then((bytes) => expect(bytes.length).to.equal(80))
+            );
+        });
+    });
+
+    describe('calling render with hillshade', function () {
+        it('should succeed and return a rendered version of the GeoTIFF', function () {
+            return (
+                xhrAsPromiseBlob(tinyDEMPath)
+                    .then((tifBlob) => loam.open(tifBlob))
+                    .then((ds) => ds.render('hillshade', ['-of', 'PNG']))
+                    .then((ds) => ds.bytes())
+                    // Determined out-of-band by executing gdaldem on the command line.
+                    .then((bytes) => expect(bytes.length).to.equal(246))
+            );
+        });
+    });
+
     /**
      * Failure cases
      **/
@@ -357,6 +384,52 @@ describe('Given that loam exists', () => {
                             'All items in the argument list must be strings'
                         )
                 );
+        });
+    });
+
+    describe('calling render with an invalid mode', function () {
+        it('should fail and return an error message', function () {
+            return xhrAsPromiseBlob(tinyTifPath)
+                .then((tifBlob) => loam.open(tifBlob))
+                .then((ds) => ds.render('gobbledegook', []))
+                .then((ds) => ds.bytes()) // Call an accessor to trigger operation execution
+                .then(
+                    (result) => {
+                        throw new Error('render() promise should have been rejected but got ' +
+                            result + ' instead.'
+                        );
+                    },
+                    (error) => expect(error.message).to.include('mode must be one of'));
+        });
+    });
+    describe('calling render with color-relief but no colors', function () {
+        it('should fail and return an error message', function () {
+            return xhrAsPromiseBlob(tinyTifPath)
+                .then((tifBlob) => loam.open(tifBlob))
+                .then((ds) => ds.render('color-relief', []))
+                .then((ds) => ds.bytes()) // Call an accessor to trigger operation execution
+                .then(
+                    (result) => {
+                        throw new Error('render() promise should have been rejected but got ' +
+                            result + ' instead.'
+                        );
+                    },
+                    (error) => expect(error.message).to.include('color definition array must be provided'));
+        });
+    });
+    describe('calling render with non-color-relief but providing colors', function () {
+        it('should fail and return an error message', function () {
+            return xhrAsPromiseBlob(tinyTifPath)
+                .then((tifBlob) => loam.open(tifBlob))
+                .then((ds) => ds.render('hillshade', [], ['0.5 100 100 100']))
+                .then((ds) => ds.bytes()) // Call an accessor to trigger operation execution
+                .then(
+                    (result) => {
+                        throw new Error('render() promise should have been rejected but got ' +
+                            result + ' instead.'
+                        );
+                    },
+                    (error) => expect(error.message).to.include('color definition array should not be provided'));
         });
     });
 });

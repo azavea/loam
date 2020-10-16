@@ -11,7 +11,7 @@ export default function (GDALGetRasterYSize, errorHandling) {
         ) {
             let message = errorHandling.CPLGetLastErrorMsg();
 
-            throw Error(message);
+            throw Error('Error in GDALGetRasterYSize: ' + message);
         } else {
             return result;
         }

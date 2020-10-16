@@ -138,6 +138,19 @@ Image reprojection and warping utility. This is the equivalent of the [gdalwarp]
 #### Return value
 A promise that resolves to a new `GDALDataset`.
 
+<br />
+
+### `GDALDataset.render(mode, args, colors)`
+Utility for rendering and computing DEM metrics. This is the equivalent of the [gdaldem](https://gdal.org/programs/gdaldem.html) command.
+
+**Note**: This returns a new `GDALDataset` object but does not perform any immediate calculation. Instead, calls to `.render()` are evaluated lazily (as with `convert()` and `warp()`, above). The render operation is only evaluated when necessary in order to access some property of the dataset, such as its size, bytes, or band count. Successive calls to `.warp()` and `.convert()` can be lazily chained onto datasets produced by `.render()`, and vice-versa.
+#### Parameters
+- `mode`: One of ['hillshade', 'slope','aspect', 'color-relief', 'TRI', 'TPI', 'roughness']. See the [`gdaldem documentation`](https://gdal.org/programs/gdaldem.html#cmdoption-arg-mode) for an explanation of the function of each mode.
+- `args`: An array of strings, each representing a single [command-line argument](https://gdal.org/programs/gdaldem.html#synopsis) accepted by the `gdaldem` command. The `inputdem` and `output_xxx_map` parameters should be omitted; these are handled by `GDALDataset`. Example: `ds.render('hillshade', ['-of', 'PNG'])`
+- `colors`: If (and only if) `mode` is equal to 'color-relief', an array of strings representing lines in [the color text file](https://gdal.org/programs/gdaldem.html#color-relief). Example: `ds.render('color-relief', ['-of', 'PNG'], ['993.0 255 0 0'])`. See the [`gdaldem documentation`](https://gdal.org/programs/gdaldem.html#cmdoption-arg-color_text_file) for an explanation of the text file syntax.
+#### Return value
+A promise that resolves to a new `GDALDataset`.
+
 # Developing
 
 After cloning,
