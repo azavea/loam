@@ -5,11 +5,13 @@ export default function (GDALGetRasterYSize, errorHandling) {
         let errorType = errorHandling.CPLGetLastErrorType();
 
         // Check for errors; clean up and throw if error is detected
-        if (errorType === errorHandling.CPLErr.CEFailure ||
-                errorType === errorHandling.CPLErr.CEFatal) {
+        if (
+            errorType === errorHandling.CPLErr.CEFailure ||
+            errorType === errorHandling.CPLErr.CEFatal
+        ) {
             let message = errorHandling.CPLGetLastErrorMsg();
 
-            throw Error(message);
+            throw Error('Error in GDALGetRasterYSize: ' + message);
         } else {
             return result;
         }

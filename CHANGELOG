@@ -1,5 +1,11 @@
 ## Upcoming release
 
+## 1.0.0-rc.2 (2020-10-30)
+- Add information on contributing to the README
+- Apply code auto-formatting
+- Improve error messages with originating function names
+- Add GDALDataset.render() to provide gdaldem functionality
+
 ## 1.0.0-rc.1 (2020-07-24)
 - Add loam.rasterize() wrapper for GDALRasterize()
 - Add pathPrefix parameter to loam.initialize()

@@ -2,7 +2,7 @@ export default function guessFileExtension(args) {
     const supportedFormats = {
         PNG: 'png',
         JPEG: 'jpg',
-        GTiff: 'tif'
+        GTiff: 'tif',
     };
 
     // Match GDAL 2.1 behavior: if output format is unspecified, the output format is GeoTiff

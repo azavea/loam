@@ -23,19 +23,21 @@ export default function (GDALOpen, errorHandling, rootPath) {
         let errorType = errorHandling.CPLGetLastErrorType();
 
         // Check for errors; clean up and throw if error is detected
-        if (errorType === errorHandling.CPLErr.CEFailure ||
-                errorType === errorHandling.CPLErr.CEFatal) {
+        if (
+            errorType === errorHandling.CPLErr.CEFailure ||
+            errorType === errorHandling.CPLErr.CEFatal
+        ) {
             FS.unmount(directory);
             FS.rmdir(directory);
             let message = errorHandling.CPLGetLastErrorMsg();
 
-            throw new Error(message);
+            throw new Error('Error in GDALOpen: ' + message);
         } else {
             return {
                 datasetPtr: datasetPtr,
                 filePath: filePath,
                 directory: directory,
-                filename: filename
+                filename: filename,
             };
         }
     };

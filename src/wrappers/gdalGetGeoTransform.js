@@ -26,15 +26,17 @@ export default function (GDALGetGeoTransform, errorHandling) {
         let errorType = errorHandling.CPLGetLastErrorType();
 
         // Check for errors; clean up and throw if error is detected
-        if (errorType === errorHandling.CPLErr.CEFailure ||
-                errorType === errorHandling.CPLErr.CEFatal) {
+        if (
+            errorType === errorHandling.CPLErr.CEFailure ||
+            errorType === errorHandling.CPLErr.CEFatal
+        ) {
             Module._free(byteOffset);
             let message = errorHandling.CPLGetLastErrorMsg();
 
-            throw new Error(message);
+            throw new Error('Error in GDALGetGeoTransform: ' + message);
         } else {
-            // To avoid memory leaks in the Emscripten heap, we need to free up the memory we allocated
-            // after we've converted it into a Javascript object.
+            // To avoid memory leaks in the Emscripten heap, we need to free up the memory we
+            // allocated after we've converted it into a Javascript object.
             let result = Array.from(geoTransform);
 
             Module._free(byteOffset);
