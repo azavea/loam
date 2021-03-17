@@ -1,5 +1,8 @@
 ## Upcoming release
 
+## 1.0.0 (2021-03-17)
+- No changes from RC.2 except dependency updates
+
 ## 1.0.0-rc.2 (2020-10-30)
 - Add information on contributing to the README
 - Apply code auto-formatting
