@@ -1,5 +1,5 @@
 import { initWorker, runOnWorker } from './workerCommunication.js';
-import { GDALDataset } from './gdalDataset.js';
+import { GDALDataset } from './gdalDataset';
 
 function open(file) {
     return new Promise((resolve, reject) => {

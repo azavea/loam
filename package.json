@@ -4,6 +4,8 @@
   "description": "Javascript wrapper for GDAL in the browser",
   "main": "lib/loam.js",
   "scripts": {
+    "compile": "tsc --noEmit",
+    "compile:watch": "tsc --noEmit --watch",
     "build": "webpack --env dev && webpack --env build",
     "dev": "webpack --progress --color --watch --env dev",
     "test": "karma start --single-run --browser ChromeHeadless karma.conf.js",

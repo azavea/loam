@@ -1,15 +1,26 @@
 import { accessFromDataset } from './workerCommunication.js';
 
+type Args = (string | undefined | Args)[];
+
 // A function, to be executed within the GDAL webworker context, that outputs a dataset.
 export class DatasetOperation {
-    constructor(functionName, args) {
+    func: string;
+    args: Args;
+
+    constructor(functionName: string, args: Args) {
         this.func = functionName;
         this.args = args;
     }
 }
 
+type Mode = 'hillshade' | 'slope' | 'aspect' | 'color-relief' | 'TRI' | 'TPI' | 'roughness';
+type Colors<M extends Mode> = M extends 'color-relief' ? string[] : never;
+
 export class GDALDataset {
-    constructor(source, operations) {
+    source: string;
+    operations: readonly DatasetOperation[];
+
+    constructor(source: string, operations: readonly DatasetOperation[]) {
         this.source = source;
         if (operations && operations.length > 0) {
             this.operations = operations;
@@ -48,8 +59,8 @@ export class GDALDataset {
         return accessFromDataset('GDALGetGeoTransform', this);
     }
 
-    convert(args) {
-        return new Promise((resolve, reject) => {
+    convert(args: string[]) {
+        return new Promise((resolve) => {
             resolve(
                 new GDALDataset(
                     this.source,
@@ -59,8 +70,8 @@ export class GDALDataset {
         });
     }
 
-    warp(args) {
-        return new Promise((resolve, reject) => {
+    warp(args: string[]) {
+        return new Promise((resolve) => {
             resolve(
                 new GDALDataset(
                     this.source,
@@ -70,14 +81,14 @@ export class GDALDataset {
         });
     }
 
-    render(mode, args, colors) {
-        return new Promise((resolve, reject) => {
+    render<M extends Mode>(mode: M, args: Args, colors?: Colors<M>) {
+        return new Promise((resolve) => {
             // DEMProcessing requires an auxiliary color definition file in some cases, so the API
             // can't be easily represented as an array of strings. This packs the user-friendly
             // interface of render() into an array that the worker communication machinery can
             // easily make use of. It'll get unpacked inside the worker. Yet another reason to use
             // something like comlink (#49)
-            const cliOrderArgs = [mode, colors].concat(args);
+            const cliOrderArgs: Args = [mode, colors, ...args];
 
             resolve(
                 new GDALDataset(
@@ -89,7 +100,7 @@ export class GDALDataset {
     }
 
     close() {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             const warningMsg =
                 'It is not necessary to call close() on a Loam dataset. This is a no-op';
 
