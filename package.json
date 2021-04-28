@@ -5,7 +5,7 @@
   "main": "lib/loam.js",
   "scripts": {
     "build": "webpack --env dev && webpack --env build",
-    "dev": "webpack --progress --colors --watch --env dev",
+    "dev": "webpack --progress --color --watch --env dev",
     "test": "karma start --single-run --browser ChromeHeadless karma.conf.js",
     "test:watch": "karma start --auto-watch --browser ChromeHeadless karma.conf.js",
     "test:ci": "webpack --env dev && webpack --env build && karma start --single-run --browser ChromeHeadless karma.conf.js"
@@ -51,6 +51,7 @@
     "prettier": "^2.2.1",
     "ts-loader": "^9.1.1",
     "typescript": "^4.2.4",
+    "uglifyjs-webpack-plugin": "^2.2.0",
     "webpack": "^5.35.1",
     "webpack-cli": "^4.6.0",
     "yargs": "^16.2.0"

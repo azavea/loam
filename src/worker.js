@@ -1,4 +1,4 @@
-/* global FS, addFunction, importScripts, postMessage */
+/* global FS, addFunction, importScripts */
 
 // w is for wrap
 // The wrappers are factories that return functions which perform the necessary setup and
@@ -244,7 +244,7 @@ onmessage = function (msg) {
             postMessage({
                 success: false,
                 message:
-                // eslint-disable-next-line max-len
+                    // eslint-disable-next-line max-len
                     'Worker could not parse message: either func + args or accessor + dataset is required',
                 id: msg.data.id,
             });

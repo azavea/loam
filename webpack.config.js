@@ -1,26 +1,20 @@
 /* global __dirname, require, module*/
 
 const webpack = require('webpack');
-const UglifyJsPlugin = webpack.optimize.UglifyJsPlugin;
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const path = require('path');
 const env = require('yargs').argv.env; // use --env with webpack 2
 
-let libraryName = 'loam';
+const libraryName = 'loam';
 
-let plugins = [],
-    outputFile;
-
-if (env === 'build') {
-    plugins.push(new UglifyJsPlugin({ minimize: true }));
-    outputFile = '[name].min.js';
-} else {
-    outputFile = '[name].js';
-}
+const isBuildEnv = env === 'build';
+const outputFile = isBuildEnv ? '[name].min.js' : '[name].js';
 
 const config = {
+    mode: isBuildEnv ? 'production' : 'development',
     entry: {
         loam: __dirname + '/src/index.ts',
-        'loam-worker': __dirname + '/src/worker.js'
+        'loam-worker': __dirname + '/src/worker.js',
     },
     devtool: 'source-map',
     output: {
@@ -28,7 +22,7 @@ const config = {
         filename: outputFile,
         library: libraryName,
         libraryTarget: 'umd',
-        umdNamedDefine: true
+        umdNamedDefine: true,
     },
     module: {
         rules: [
@@ -39,25 +33,28 @@ const config = {
                         loader: 'babel-loader',
                         options: {
                             cacheDirectory: true,
-                            presets: [['@babel/preset-env', { targets: { node: '8' } }]]
-                        }
+                            presets: [['@babel/preset-env', { targets: { node: '8' } }]],
+                        },
                     },
-                    'ts-loader'
+                    'ts-loader',
                 ],
-                exclude: /node_modules/
+                exclude: /node_modules/,
             },
             {
                 test: /(\.jsx|\.js)$/,
                 loader: 'eslint-loader',
-                exclude: /node_modules/
-            }
-        ]
+                exclude: /node_modules/,
+            },
+        ],
     },
     resolve: {
         modules: [path.resolve('./node_modules'), path.resolve('./src')],
-        extensions: ['.json', '.js', '.ts']
+        extensions: ['.json', '.js', '.ts'],
     },
-    plugins: plugins
+    optimization: {
+        minimize: isBuildEnv,
+        minimizer: [new UglifyJsPlugin()],
+    },
 };
 
 module.exports = config;
