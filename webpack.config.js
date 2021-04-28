@@ -28,16 +28,12 @@ const config = {
         rules: [
             {
                 test: /\.tsx?$/,
-                use: [
-                    {
-                        loader: 'babel-loader',
-                        options: {
-                            cacheDirectory: true,
-                            presets: [['@babel/preset-env', { targets: { node: '8' } }]],
-                        },
-                    },
-                    'ts-loader',
-                ],
+                loader: 'ts-loader',
+                exclude: /node_modules/,
+            },
+            {
+                test: /(\.jsx|\.js)$/,
+                loader: 'babel-loader',
                 exclude: /node_modules/,
             },
             {
