@@ -1,12 +1,16 @@
 {
   "compilerOptions": {
     "outDir": "./lib/",
+    "allowSyntheticDefaultImports": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
     "sourceMap": true,
     "strict": true,
     "module": "esnext",
-    "target": "es5",
-    "allowJs": true,
-    "moduleResolution": "node"
+    "target": "esnext",
+    "allowJs": true
   },
   "include": ["./src/**/*"]
 }
