@@ -1,4 +1,5 @@
 ## Upcoming release
+- Add TypeScript support and add types for GDALDataset [#66](https://github.com/azavea/loam/pull/66)
 
 ## 1.0.0 (2021-03-17)
 - No changes from RC.2 except dependency updates
