@@ -13,7 +13,7 @@ const outputFile = isBuildEnv ? '[name].min.js' : '[name].js';
 const config = {
     mode: isBuildEnv ? 'production' : 'development',
     entry: {
-        loam: __dirname + '/src/index.ts',
+        loam: __dirname + '/src/index.js',
         'loam-worker': __dirname + '/src/worker.js',
     },
     devtool: 'source-map',
