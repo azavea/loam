@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Javascript wrapper for GDAL in the browser",
   "main": "lib/loam.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "compile": "tsc --noEmit",
     "compile:watch": "tsc --noEmit --watch",
