@@ -37,6 +37,8 @@ ln -s ../node_modules/gdal-js/gdal.wasm public/gdal.wasm
 ## Basic usage
 
 ```javascript
+import loam from "loam";
+
 // Load WebAssembly and data files asynchronously. Will be called automatically by loam.open()
 // but it is often helpful for responsiveness to pre-initialize because these files are fairly large. Returns a promise.
 loam.initialize();
