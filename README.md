@@ -9,17 +9,36 @@ npm install loam
 
 Assuming you are using a build system, the main `loam` library should integrate into your build the same as any other library might. However, in order to correctly initialize the Emscripten environment for running GDAL, there are other assets that need to be accessible via HTTP request at runtime, but which should _not_ be included in the main application bundle. Specifically, these are:
 
-- `loam-worker.min.js`: This is the "backend" of the library; it initializes the Web Worker and translates between the Loam "frontend" and GDAL.
+- `loam-worker.js`: This is the "backend" of the library; it initializes the Web Worker and translates between the Loam "frontend" and GDAL.
 - [`gdal.js`](https://www.npmjs.com/package/gdal-js): This initializes the Emscripten runtime and loads the GDAL WebAssembly.
 - [`gdal.wasm`](https://www.npmjs.com/package/gdal-js): The GDAL binary, compiled to WebAssembly.
 - [`gdal.data`](https://www.npmjs.com/package/gdal-js): Contains configuration files that GDAL expects to find on the host filesystem.
 
-All of these files will be included in the `node_modules` folder after running `npm install loam`, but it is up to you to integrate them into your development environment and deployment processes.
+All of these files will be included in the `node_modules` folder after running `npm install loam`, but it is up to you to integrate them into your development environment and deployment processes. Unfortunately, support for WebAssembly and Web Workers is still relatively young, so many build tools do not yet have a straightforward out-of-the-box solution that will work. However, in general, treating the four files above similarly to static assets (e.g. images, videos, or PDFs) tends to work fairly well. An example for Create React App is given below.
+
+## Create React App
+When integrating Loam with a React app that was initialized using Create React App, the simplest thing to do is probably to copy the assets above into [the `/public` folder](https://create-react-app.dev/docs/using-the-public-folder#adding-assets-outside-of-the-module-system), like so:
+
+```
+cp node_modules/gdal-js/gdal.* node_modules/loam/lib/loam-worker.js public/
+```
+
+This will cause the CRA build system to copy these files into the build folder untouched, where they can then be accessed by URL (e.g. `http://localhost:3000/gdal.wasm`).
+However, this has the disadvantage that you will need to commit the copied files to source control, and they won't be updated if you update Loam. A way to work around this is to put symlinks in `/public` instead:
+
+```
+ln -s ../node_modules/loam/lib/loam-worker.js public/loam-worker.js
+ln -s ../node_modules/gdal-js/gdal.wasm public/gdal.wasm
+ln -s ../node_modules/gdal-js/gdal.data public/gdal.data
+ln -s ../node_modules/gdal-js/gdal.wasm public/gdal.wasm
+```
 
 # API Documentation
 ## Basic usage
 
 ```javascript
+import loam from "loam";
+
 // Load WebAssembly and data files asynchronously. Will be called automatically by loam.open()
 // but it is often helpful for responsiveness to pre-initialize because these files are fairly large. Returns a promise.
 loam.initialize();
