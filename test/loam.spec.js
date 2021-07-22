@@ -73,6 +73,20 @@ describe('Given that loam exists', () => {
             );
         });
     });
+    describe('calling initialize with a bad GDAL prefix', function () {
+        it('should attempt to load GDAL from the prefix and fail', () => {
+            return loam.initialize('/base/lib/', '/bad/path/').then(
+                () => {
+                    throw new Error(
+                        'initialize() should have been rejected, but it was resolved instead'
+                    );
+                },
+                (error) => {
+                    expect(error.message).to.include('NetworkError');
+                }
+            );
+        });
+    });
 });
 
 // Tests for Loam GDAL functionality

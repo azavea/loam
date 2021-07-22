@@ -51,14 +51,15 @@ loam.open(blob).then((dataset) => {
 ```
 
 ## Functions
-### `loam.initialize(pathPrefix)`
+### `loam.initialize(pathPrefix, gdalPrefix)`
 Manually set up web worker and initialize Emscripten runtime. This function is called automatically by other functions on `loam`. Returns a promise that is resolved when Loam is fully initialized.
 
 Although this function is called automatically by other functions, such as `loam.open()`, it is often beneficial for user experience to manually call `loam.initialize()`, because it allows pre-fetching Loam's WebAssembly assets (which are several megabytes uncompressed) at a time when the latency required to download them will be least perceptible by the user. For example, `loam.initialize()` could be called when the user clicks a button to open a file-selection dialog, allowing the WebAssembly to load in the background while the user selects a file.
 
 This function is safe to call multiple times.
 #### Parameters
-- `pathPrefix`: The path prefix that Loam should use when downloading its WebAssembly assets. If left undefined, Loam will make a best guess based on the source path of its own `<script>` element. If Loam fails to work properly and you see requests resulting in 404s for the `gdal.*` assets listed above, then you will need to set this parameter so that Loam requests the correct paths for its WebAssembly assets.
+- `pathPrefix` (optional): The path or URL that Loam should use as a prefix when fetching its Web Worker. If left undefined, Loam will make a best guess based on the source path of its own `<script>` element. URLs with domains may be used to enable Loam to be loaded from CDNs like unpkg, but the file name should be left off.
+- `gdalPrefix` (optional): The path or URL that Loam should use as a prefix when fetching WebAssembly assets for GDAL. If left undefined, Loam will use the same value as `pathPrefix`. URLs with domains may be used to enable loading from CDNs like unpkg, but the file name should be left off. If Loam fails to work properly and you see requests resulting in 404s or other errors for the `gdal.*` assets listed above, you will need to set `pathPrefix`, or this parameter, or both, to the correct locations where Loam can find those assets.
 #### Return value
 A promise that resolves when Loam is initialized. All of the functions described in this document wait for this promise's resolution when executing, so paying attention to whether this promise has resolved or not is not required. However, it may be helpful to do so in some circumstances, for example, if you want to display a visual indicator that your app is ready.
 

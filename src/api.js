@@ -33,8 +33,8 @@ function reproject(fromCRS, toCRS, coords) {
     return runOnWorker('LoamReproject', [fromCRS, toCRS, xCoords, yCoords]);
 }
 
-function initialize(pathPrefix) {
-    return initWorker(pathPrefix);
+function initialize(loamPrefix, gdalPrefix) {
+    return initWorker(loamPrefix, gdalPrefix);
 }
 
 function reset() {

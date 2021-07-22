@@ -1,4 +1,4 @@
-/* global FS, addFunction, importScripts, postMessage */
+/* global FS, addFunction, postMessage */
 
 // w is for wrap
 // The wrappers are factories that return functions which perform the necessary setup and
@@ -167,10 +167,6 @@ self.Module = {
         postMessage({ ready: true });
     },
 };
-
-// Load gdal.js. This will populate the Module object, and then call
-// Module.onRuntimeInitialized() when it is ready for user code to interact with it.
-importScripts('gdal.js');
 
 function handleDatasetAccess(accessor, dataset) {
     // 1: Open the source.
