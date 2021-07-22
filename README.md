@@ -96,6 +96,17 @@ A promise that resolves with an array of transformed coordinate pairs.
 
 <br />
 
+### `loam.reset()`
+Tear down Loam's internal Web Worker. This will cause initialize() to create a new Web Worker the next time it is called.
+
+**Note**: This exists primarily to enable certain types of unit testing. It should not be necessary to call this function during normal usage of Loam. If you find that you are encountering a problem that loam.reset() solves, please [open an issue](https://github.com/azavea/loam/issues)
+#### Parameters
+- None
+#### Return value
+A promise that resolves when the Web Worker has been terminated. This function waits for initialize() to complete or fail before tearing down the worker.
+
+<br />
+
 ### `GDALDataset.close()`
 This used to be required in order to avoid memory leaks in earlier versions of Loam, but is currently a no-op. It has been maintained to preserve backwards compatibility, but has no effect other than to display a console warning.
 #### Return value

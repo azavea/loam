@@ -1,4 +1,4 @@
-import { initWorker, runOnWorker } from './workerCommunication.js';
+import { initWorker, clearWorker, runOnWorker } from './workerCommunication.js';
 import { GDALDataset } from './gdalDataset.js';
 
 function open(file) {
@@ -37,4 +37,8 @@ function initialize(pathPrefix) {
     return initWorker(pathPrefix);
 }
 
-export { open, rasterize, initialize, reproject };
+function reset() {
+    return clearWorker();
+}
+
+export { open, rasterize, initialize, reset, reproject };

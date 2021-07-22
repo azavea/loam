@@ -1,5 +1,6 @@
 ## Upcoming release
 - Improve documentation for integrating with build tools
+- Add a reset() function that allows tearing down the Loam worker
 
 ## 1.0.0 (2021-03-17)
 - No changes from RC.2 except dependency updates
