@@ -1,4 +1,4 @@
-/* global FS, addFunction, postMessage */
+/* global FS, addFunction */
 
 // w is for wrap
 // The wrappers are factories that return functions which perform the necessary setup and

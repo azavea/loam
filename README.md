@@ -191,6 +191,15 @@ After cloning,
 
 Built assets are placed in `lib`.
 
+## Demo page
+There is a (very!) simple demo page available that utilizes Loam to print info about a GeoTIFF. To view it in a browser, run
+`yarn demo`, and then navigate to http://localhost:8080/ . You can use this site for things like:
+
+- Playing around with Loam by editing the source code in `demo/index.js`
+- Validating changes that are difficult to test fully in CI
+
+Editing Loam or the source in `demo/` should auto-reload.
+
 # Contributing
 
 Contributions are welcomed! Please feel free to work on any of the open issues or open an issue describing the changes you'd like to make. All contributions will be licensed under the Apache License, as per the [GitHub Terms of Service](https://docs.github.com/en/github/site-policy/github-terms-of-service#6-contributions-under-repository-license).
