@@ -30,6 +30,8 @@ However, this has the disadvantage that you will need to commit the copied files
 ln -s ../node_modules/loam/lib/loam-worker.js public/loam-worker.js
 ln -s ../node_modules/gdal-js/gdal.wasm public/gdal.wasm
 ln -s ../node_modules/gdal-js/gdal.data public/gdal.data
+ln -s ../node_modules/gdal-js/gdal.js public/gdal.js
+
 ```
 
 # API Documentation
