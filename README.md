@@ -9,17 +9,37 @@ npm install loam
 
 Assuming you are using a build system, the main `loam` library should integrate into your build the same as any other library might. However, in order to correctly initialize the Emscripten environment for running GDAL, there are other assets that need to be accessible via HTTP request at runtime, but which should _not_ be included in the main application bundle. Specifically, these are:
 
-- `loam-worker.min.js`: This is the "backend" of the library; it initializes the Web Worker and translates between the Loam "frontend" and GDAL.
+- `loam-worker.js`: This is the "backend" of the library; it initializes the Web Worker and translates between the Loam "frontend" and GDAL.
 - [`gdal.js`](https://www.npmjs.com/package/gdal-js): This initializes the Emscripten runtime and loads the GDAL WebAssembly.
 - [`gdal.wasm`](https://www.npmjs.com/package/gdal-js): The GDAL binary, compiled to WebAssembly.
 - [`gdal.data`](https://www.npmjs.com/package/gdal-js): Contains configuration files that GDAL expects to find on the host filesystem.
 
-All of these files will be included in the `node_modules` folder after running `npm install loam`, but it is up to you to integrate them into your development environment and deployment processes.
+All of these files will be included in the `node_modules` folder after running `npm install loam`, but it is up to you to integrate them into your development environment and deployment processes. Unfortunately, support for WebAssembly and Web Workers is still relatively young, so many build tools do not yet have a straightforward out-of-the-box solution that will work. However, in general, treating the four files above similarly to static assets (e.g. images, videos, or PDFs) tends to work fairly well. An example for Create React App is given below.
+
+## Create React App
+When integrating Loam with a React app that was initialized using Create React App, the simplest thing to do is probably to copy the assets above into [the `/public` folder](https://create-react-app.dev/docs/using-the-public-folder#adding-assets-outside-of-the-module-system), like so:
+
+```
+cp node_modules/gdal-js/gdal.* node_modules/loam/lib/loam-worker.js public/
+```
+
+This will cause the CRA build system to copy these files into the build folder untouched, where they can then be accessed by URL (e.g. `http://localhost:3000/gdal.wasm`).
+However, this has the disadvantage that you will need to commit the copied files to source control, and they won't be updated if you update Loam. A way to work around this is to put symlinks in `/public` instead:
+
+```
+ln -s ../node_modules/loam/lib/loam-worker.js public/loam-worker.js
+ln -s ../node_modules/gdal-js/gdal.wasm public/gdal.wasm
+ln -s ../node_modules/gdal-js/gdal.data public/gdal.data
+ln -s ../node_modules/gdal-js/gdal.js public/gdal.js
+
+```
 
 # API Documentation
 ## Basic usage
 
 ```javascript
+import loam from "loam";
+
 // Load WebAssembly and data files asynchronously. Will be called automatically by loam.open()
 // but it is often helpful for responsiveness to pre-initialize because these files are fairly large. Returns a promise.
 loam.initialize();
@@ -31,14 +51,15 @@ loam.open(blob).then((dataset) => {
 ```
 
 ## Functions
-### `loam.initialize(pathPrefix)`
+### `loam.initialize(pathPrefix, gdalPrefix)`
 Manually set up web worker and initialize Emscripten runtime. This function is called automatically by other functions on `loam`. Returns a promise that is resolved when Loam is fully initialized.
 
 Although this function is called automatically by other functions, such as `loam.open()`, it is often beneficial for user experience to manually call `loam.initialize()`, because it allows pre-fetching Loam's WebAssembly assets (which are several megabytes uncompressed) at a time when the latency required to download them will be least perceptible by the user. For example, `loam.initialize()` could be called when the user clicks a button to open a file-selection dialog, allowing the WebAssembly to load in the background while the user selects a file.
 
 This function is safe to call multiple times.
 #### Parameters
-- `pathPrefix`: The path prefix that Loam should use when downloading its WebAssembly assets. If left undefined, Loam will make a best guess based on the source path of its own `<script>` element. If Loam fails to work properly and you see requests resulting in 404s for the `gdal.*` assets listed above, then you will need to set this parameter so that Loam requests the correct paths for its WebAssembly assets.
+- `pathPrefix` (optional): The path or URL that Loam should use as a prefix when fetching its Web Worker. If left undefined, Loam will make a best guess based on the source path of its own `<script>` element. URLs with domains may be used to enable Loam to be loaded from CDNs like unpkg, but the file name should be left off.
+- `gdalPrefix` (optional): The path or URL that Loam should use as a prefix when fetching WebAssembly assets for GDAL. If left undefined, Loam will use the same value as `pathPrefix`. URLs with domains may be used to enable loading from CDNs like unpkg, but the file name should be left off. If Loam fails to work properly and you see requests resulting in 404s or other errors for the `gdal.*` assets listed above, you will need to set `pathPrefix`, or this parameter, or both, to the correct locations where Loam can find those assets.
 #### Return value
 A promise that resolves when Loam is initialized. All of the functions described in this document wait for this promise's resolution when executing, so paying attention to whether this promise has resolved or not is not required. However, it may be helpful to do so in some circumstances, for example, if you want to display a visual indicator that your app is ready.
 
@@ -73,6 +94,17 @@ Reproject coordinates from one coordinate system to another using PROJ.4.
 - `coords`: An array of [x, y] coordinate pairs.
 #### Return value
 A promise that resolves with an array of transformed coordinate pairs.
+
+<br />
+
+### `loam.reset()`
+Tear down Loam's internal Web Worker. This will cause initialize() to create a new Web Worker the next time it is called.
+
+**Note**: This exists primarily to enable certain types of unit testing. It should not be necessary to call this function during normal usage of Loam. If you find that you are encountering a problem that loam.reset() solves, please [open an issue](https://github.com/azavea/loam/issues)
+#### Parameters
+- None
+#### Return value
+A promise that resolves when the Web Worker has been terminated. This function waits for initialize() to complete or fail before tearing down the worker.
 
 <br />
 
@@ -158,6 +190,15 @@ After cloning,
 2. `yarn dev` and in another session `yarn test:watch`
 
 Built assets are placed in `lib`.
+
+## Demo page
+There is a (very!) simple demo page available that utilizes Loam to print info about a GeoTIFF. To view it in a browser, run
+`yarn demo`, and then navigate to http://localhost:8080/ . You can use this site for things like:
+
+- Playing around with Loam by editing the source code in `demo/index.js`
+- Validating changes that are difficult to test fully in CI
+
+Editing Loam or the source in `demo/` should auto-reload.
 
 # Contributing
 

@@ -1,4 +1,4 @@
-import { initWorker, runOnWorker } from './workerCommunication.js';
+import { initWorker, clearWorker, runOnWorker } from './workerCommunication.js';
 import { GDALDataset } from './gdalDataset.js';
 
 function open(file) {
@@ -33,8 +33,12 @@ function reproject(fromCRS, toCRS, coords) {
     return runOnWorker('LoamReproject', [fromCRS, toCRS, xCoords, yCoords]);
 }
 
-function initialize(pathPrefix) {
-    return initWorker(pathPrefix);
+function initialize(loamPrefix, gdalPrefix) {
+    return initWorker(loamPrefix, gdalPrefix);
 }
 
-export { open, rasterize, initialize, reproject };
+function reset() {
+    return clearWorker();
+}
+
+export { open, rasterize, initialize, reset, reproject };

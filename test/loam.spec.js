@@ -1,4 +1,4 @@
-/* global describe, it, before, expect, loam */
+/* global describe, it, before, afterEach, expect, loam */
 const tinyTifPath = '/base/test/assets/tiny.tif';
 const tinyDEMPath = '/base/test/assets/tiny_dem.tif';
 const invalidTifPath = 'base/test/assets/not-a-tiff.bytes';
@@ -44,10 +44,56 @@ function xhrAsPromiseBlob(url) {
     });
 }
 
+// Tests for the Loam initialization / teardown process
+describe('Given that loam exists', () => {
+    afterEach(function () {
+        return loam.reset();
+    });
+
+    describe('calling initialize with a prefix', function () {
+        it('should attempt to load loam-worker from the prefix', () => {
+            // This is the same prefix as it would determine by default, so this should work (unless
+            // something changes regarding the test server setup).
+            return loam.initialize('/base/lib/').then((worker) => {
+                expect(worker).to.be.an.instanceof(Worker);
+            });
+        });
+    });
+    describe('calling initialize with a bad Loam prefix', function () {
+        it('should attempt to load loam-worker from the prefix and fail', () => {
+            return loam.initialize('/foo/').then(
+                () => {
+                    throw new Error(
+                        'initialize() should have been rejected, but it was resolved instead'
+                    );
+                },
+                (error) => {
+                    expect(error.message).to.include('NetworkError');
+                }
+            );
+        });
+    });
+    describe('calling initialize with a bad GDAL prefix', function () {
+        it('should attempt to load GDAL from the prefix and fail', () => {
+            return loam.initialize('/base/lib/', '/bad/path/').then(
+                () => {
+                    throw new Error(
+                        'initialize() should have been rejected, but it was resolved instead'
+                    );
+                },
+                (error) => {
+                    expect(error.message).to.include('NetworkError');
+                }
+            );
+        });
+    });
+});
+
+// Tests for Loam GDAL functionality
 describe('Given that loam exists', () => {
     before(function () {
         this.timeout(15000);
-        return loam.initialize();
+        return loam.reset().then(() => loam.initialize());
     });
 
     describe('calling open with a Blob', function () {
@@ -395,11 +441,14 @@ describe('Given that loam exists', () => {
                 .then((ds) => ds.bytes()) // Call an accessor to trigger operation execution
                 .then(
                     (result) => {
-                        throw new Error('render() promise should have been rejected but got ' +
-                            result + ' instead.'
+                        throw new Error(
+                            'render() promise should have been rejected but got ' +
+                                result +
+                                ' instead.'
                         );
                     },
-                    (error) => expect(error.message).to.include('mode must be one of'));
+                    (error) => expect(error.message).to.include('mode must be one of')
+                );
         });
     });
     describe('calling render with color-relief but no colors', function () {
@@ -410,11 +459,15 @@ describe('Given that loam exists', () => {
                 .then((ds) => ds.bytes()) // Call an accessor to trigger operation execution
                 .then(
                     (result) => {
-                        throw new Error('render() promise should have been rejected but got ' +
-                            result + ' instead.'
+                        throw new Error(
+                            'render() promise should have been rejected but got ' +
+                                result +
+                                ' instead.'
                         );
                     },
-                    (error) => expect(error.message).to.include('color definition array must be provided'));
+                    (error) =>
+                        expect(error.message).to.include('color definition array must be provided')
+                );
         });
     });
     describe('calling render with non-color-relief but providing colors', function () {
@@ -425,11 +478,17 @@ describe('Given that loam exists', () => {
                 .then((ds) => ds.bytes()) // Call an accessor to trigger operation execution
                 .then(
                     (result) => {
-                        throw new Error('render() promise should have been rejected but got ' +
-                            result + ' instead.'
+                        throw new Error(
+                            'render() promise should have been rejected but got ' +
+                                result +
+                                ' instead.'
                         );
                     },
-                    (error) => expect(error.message).to.include('color definition array should not be provided'));
+                    (error) =>
+                        expect(error.message).to.include(
+                            'color definition array should not be provided'
+                        )
+                );
         });
     });
 });
