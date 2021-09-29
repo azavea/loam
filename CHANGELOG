@@ -1,4 +1,6 @@
-## Upcoming release
+## Upcoming
+
+## 1.1.0 (2021-09-29)
 - Improve documentation for integrating with build tools
 - Add a reset() function that allows tearing down the Loam worker
 - Allow initializing Loam from a CDN
