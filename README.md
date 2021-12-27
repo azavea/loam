@@ -150,6 +150,13 @@ A promise which resolves to the affine transform.
 
 <br />
 
+### `GDALDataset.bytes()`
+Get the on-disk representation of the dataset, as an array of bytes.
+#### Return value
+A promise which resolves to a Uint8Array containing the bytes of the dataset.
+
+<br />
+
 ### `GDALDataset.convert(args)`
 Converts raster data between different formats. This is the equivalent of the [gdal_translate](https://gdal.org/programs/gdal_translate.html) command.
 

@@ -1,4 +1,5 @@
 ## Upcoming
+- Document bytes() method
 
 ## 1.1.0 (2021-09-29)
 - Improve documentation for integrating with build tools
