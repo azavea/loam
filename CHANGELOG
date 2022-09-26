@@ -1,5 +1,8 @@
 ## Upcoming
 - Document bytes() method
+- Add Node versions 16 and 18 to testing matrix
+- Drop official support for Node 12
+- Update to latest stable version of Yarn
 
 ## 1.1.0 (2021-09-29)
 - Improve documentation for integrating with build tools
