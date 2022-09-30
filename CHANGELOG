@@ -1,3 +1,6 @@
+## UPCOMING
+- Allow users to specify a valid absolute URL when the default URL is invalid
+
 ## 1.1.1 (2022-09-30)
 - Document bytes() method
 - Fix production bundle not including unminified assets.

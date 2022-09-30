@@ -188,12 +188,7 @@ describe('Given that loam exists', () => {
                 .then((ds) => ds.transform())
                 .then((transform) => {
                     expect(transform).to.deep.equal([
-                        -8380165.213197844,
-                        2416.6666666666665,
-                        0,
-                        4886134.645645497,
-                        0,
-                        -2468.75,
+                        -8380165.213197844, 2416.6666666666665, 0, 4886134.645645497, 0, -2468.75,
                     ]);
                 });
         });
@@ -240,11 +235,7 @@ describe('Given that loam exists', () => {
                     // Determined out-of-band by executing gdalwarp on the command line.
                     .then((transform) => {
                         expect(transform).to.deep.equal([
-                            -75.2803049446235,
-                            0.019340471787624117,
-                            0.0,
-                            40.13881222863268,
-                            0.0,
+                            -75.2803049446235, 0.019340471787624117, 0.0, 40.13881222863268, 0.0,
                             -0.019340471787624117,
                         ]);
                     })
