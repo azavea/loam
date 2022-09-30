@@ -1,4 +1,4 @@
-## Upcoming
+## 1.1.1 (2022-09-30)
 - Document bytes() method
 - Fix production bundle not including unminified assets.
 - Add Node versions 16 and 18 to testing matrix (this library currently targets browser environments only)
