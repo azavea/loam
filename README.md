@@ -191,8 +191,10 @@ Utility for rendering and computing DEM metrics. This is the equivalent of the [
 A promise that resolves to a new `GDALDataset`.
 
 # Developing
+Yarn and NVM are required.
 
 After cloning,
+1. `nvm use`
 1. `yarn install`
 2. `yarn dev` and in another session `yarn test:watch`
 
