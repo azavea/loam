@@ -4,7 +4,7 @@
     "description": "Javascript wrapper for GDAL in the browser",
     "main": "lib/loam.js",
     "scripts": {
-        "build": "webpack --config=webpack.prod.js",
+        "build": "webpack --config=webpack.dev.js && webpack --config=webpack.prod.js",
         "dev": "webpack --progress --color --watch --config=webpack.dev.js",
         "demo": "webpack serve --config=webpack.dev.js",
         "format": "prettier --write ./src",

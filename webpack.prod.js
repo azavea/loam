@@ -9,7 +9,7 @@ const config = {
     },
     output: {
         path: path.join(__dirname, 'lib'),
-        filename: '[name].js',
+        filename: '[name].min.js',
         library: {
             name: 'loam',
             type: 'umd',
