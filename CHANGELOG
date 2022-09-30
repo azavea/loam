@@ -1,7 +1,8 @@
 ## Upcoming
 - Document bytes() method
-- Add Node versions 16 and 18 to testing matrix
-- Drop official support for Node 12
+- Fix production bundle not including unminified assets.
+- Add Node versions 16 and 18 to testing matrix (this library currently targets browser environments only)
+- Drop testing on Node 12 (this library currently targets browser environments only)
 - Update to latest stable version of Yarn
 
 ## 1.1.0 (2021-09-29)
