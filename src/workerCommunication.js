@@ -56,7 +56,18 @@ const THIS_SCRIPT = _scripts[_scripts.length - 1];
 
 // Inspired by Emscripten's method for doing the same thing
 function getPathPrefix() {
-    return THIS_SCRIPT.src.substring(0, THIS_SCRIPT.src.lastIndexOf('/')) + '/';
+    const prefix = THIS_SCRIPT.src.substring(0, THIS_SCRIPT.src.lastIndexOf('/')) + '/';
+
+    try {
+        // prefix must be a valid URL so validate that it is before returning
+        // eslint-disable-next-line no-new
+        new URL(prefix);
+        return prefix;
+    } catch (error) {
+        // Returning undefined will require the user to specify a valid absolute URL for loamPrefix
+        // at least
+        return undefined;
+    }
 }
 
 // Destroy the worker and clear the promise so that calling initWorker will make a new one.
