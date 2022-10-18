@@ -3935,10 +3935,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"gdal-js@npm:2.0.0":
-  version: 2.0.0
-  resolution: "gdal-js@npm:2.0.0"
-  checksum: b2ca359b21ff9e462621f0c76cff89970b57837a0d02c1fc333864b1142a0fa59596de860875d8bc77b9f655a7e4b0e85b01f3c58bacb1790bedfca2d57b23d5
+"gdal-js@npm:2.1.0":
+  version: 2.1.0
+  resolution: "gdal-js@npm:2.1.0"
+  checksum: 7bab71d3621c7f10cd6f0c956ea194a0b979055c333920a56849e1a7a5c17755add590bf92536ef64b5df8f39bf3e3798dffd30066999d4b9c0ff906c705b916
   languageName: node
   linkType: hard
 
@@ -4792,7 +4792,7 @@ __metadata:
     chai-as-promised: ^7.1.1
     eslint: ^7.31.0
     eslint-webpack-plugin: ^3.0.1
-    gdal-js: 2.0.0
+    gdal-js: 2.1.0
     karma: ^6.4.1
     karma-babel-preprocessor: ^8.0.2
     karma-chai: ^0.1.0

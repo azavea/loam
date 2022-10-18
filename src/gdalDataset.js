@@ -32,6 +32,10 @@ export class GDALDataset {
         return accessFromDataset('GDALGetRasterCount', this);
     }
 
+    layerCount() {
+        return accessFromDataset('GDALDatasetGetLayerCount', this);
+    }
+
     width() {
         return accessFromDataset('GDALGetRasterXSize', this);
     }

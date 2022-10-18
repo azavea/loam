@@ -2,6 +2,7 @@
 const tinyTifPath = '/base/test/assets/tiny.tif';
 const tinyDEMPath = '/base/test/assets/tiny_dem.tif';
 const invalidTifPath = 'base/test/assets/not-a-tiff.bytes';
+const geojsonPath = '/base/test/assets/geom.geojson';
 const epsg4326 =
     'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]';
 const epsg3857 =
@@ -110,6 +111,16 @@ describe('Given that loam exists', () => {
         it('should return a GDALDataset');
     });
 
+    describe('calling open with a vector', function () {
+        it('should return a GDALDataset', () => {
+            return xhrAsPromiseBlob(geojsonPath)
+                .then((geojsonBlob) => loam.open(geojsonBlob))
+                .then((ds) => {
+                    expect(ds).to.be.an.instanceof(loam.GDALDataset);
+                });
+        });
+    });
+
     describe('calling reproject()', function () {
         it('should reproject points from one CRS to another', () => {
             return loam
@@ -128,11 +139,41 @@ describe('Given that loam exists', () => {
         });
     });
 
-    describe('calling count()', function () {
+    describe('calling count() on a raster', function () {
         it('should return the number of bands in the GeoTiff', () => {
             return xhrAsPromiseBlob(tinyTifPath).then((tifBlob) =>
                 loam.open(tifBlob).then((ds) => {
                     return ds.count().then((count) => expect(count).to.equal(1));
+                })
+            );
+        });
+    });
+
+    describe('calling count() on a vector dataset', function () {
+        it('should return 0', () => {
+            return xhrAsPromiseBlob(geojsonPath).then((geojsonBlob) =>
+                loam.open(geojsonBlob).then((ds) => {
+                    return ds.count().then((count) => expect(count).to.equal(0));
+                })
+            );
+        });
+    });
+
+    describe('calling layerCount() on a raster', function () {
+        it('should return 0', () => {
+            return xhrAsPromiseBlob(tinyTifPath).then((tifBlob) =>
+                loam.open(tifBlob).then((ds) => {
+                    return ds.layerCount().then((count) => expect(count).to.equal(0));
+                })
+            );
+        });
+    });
+
+    describe('calling layerCount() on a vector dataset', function () {
+        it('should return 1', () => {
+            return xhrAsPromiseBlob(geojsonPath).then((geojsonBlob) =>
+                loam.open(geojsonBlob).then((ds) => {
+                    return ds.layerCount().then((count) => expect(count).to.equal(1));
                 })
             );
         });
@@ -334,7 +375,7 @@ describe('Given that loam exists', () => {
                                 ' instead.'
                         );
                     },
-                    (error) => expect(error.message).to.include('Failed to lookup UOM CODE 0')
+                    (error) => expect(error.message).to.include('source or target SRS failed')
                 );
         });
     });
@@ -479,6 +520,28 @@ describe('Given that loam exists', () => {
                         expect(error.message).to.include(
                             'color definition array should not be provided'
                         )
+                );
+        });
+    });
+
+    // Note that the "raster-only" term here is fairly limited. Many GDAL methods return valid
+    // (though not necessarily meaningful) information on vector datasets even when they're intended
+    // for use on rasters. For example, `GDALGetRasterXSize` and `GDALGetRasterYSize` seem to return
+    // 512 for a GeoJSON file consisting of a single point.
+    describe('calling raster-only methods on a vector dataset', function () {
+        it('should fail and return a useful error message', function () {
+            return xhrAsPromiseBlob(geojsonPath)
+                .then((geojsonBlob) => loam.open(geojsonBlob))
+                .then((ds) => ds.render('hillshade', ['-of', 'PNG']))
+                .then((ds) => ds.bytes())
+                .then(
+                    (result) => {
+                        console.log(result);
+                        throw new Error(
+                            `render() should have failed for a vector dataset but got ${result}`
+                        );
+                    },
+                    (error) => expect(error.message).to.include('Error in GDALDEMProcessing')
                 );
         });
     });

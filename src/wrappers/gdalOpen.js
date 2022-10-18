@@ -1,11 +1,17 @@
 import randomKey from '../randomKey.js';
 
+// Redefine constants from https://github.com/OSGeo/gdal/blob/v2.4.4/gdal/gcore/gdal.h
+// Constants are hard to get Emscripten to output in a way that we can usefully reference from
+// Javascript.
+const GDAL_OF_UPDATE = 0x01;
+const GDAL_OF_VERBOSE_ERROR = 0x40;
+
 /* global FS WORKERFS */
-export default function (GDALOpen, errorHandling, rootPath) {
+export default function (GDALOpenEx, errorHandling, rootPath) {
     return function (file) {
         let filename;
 
-        let directory = rootPath + randomKey();
+        const directory = rootPath + randomKey();
 
         FS.mkdir(directory);
 
@@ -13,14 +19,22 @@ export default function (GDALOpen, errorHandling, rootPath) {
             filename = file.name;
             FS.mount(WORKERFS, { files: [file] }, directory);
         } else if (file instanceof Blob) {
-            filename = 'geotiff.tif';
+            filename = 'dataset';
             FS.mount(WORKERFS, { blobs: [{ name: filename, data: file }] }, directory);
         }
-        let filePath = directory + '/' + filename;
+        const filePath = directory + '/' + filename;
 
-        let datasetPtr = GDALOpen(filePath);
+        const datasetPtr = GDALOpenEx(
+            filePath,
+            // Open for update by default. We don't currently provide users a way to control this
+            // externally and the default is read-only.
+            GDAL_OF_UPDATE | GDAL_OF_VERBOSE_ERROR,
+            null,
+            null,
+            null
+        );
 
-        let errorType = errorHandling.CPLGetLastErrorType();
+        const errorType = errorHandling.CPLGetLastErrorType();
 
         // Check for errors; clean up and throw if error is detected
         if (
@@ -29,7 +43,7 @@ export default function (GDALOpen, errorHandling, rootPath) {
         ) {
             FS.unmount(directory);
             FS.rmdir(directory);
-            let message = errorHandling.CPLGetLastErrorMsg();
+            const message = errorHandling.CPLGetLastErrorMsg();
 
             throw new Error('Error in GDALOpen: ' + message);
         } else {

@@ -6,6 +6,7 @@
 import wGDALOpen from './wrappers/gdalOpen.js';
 import wGDALRasterize from './wrappers/gdalRasterize.js';
 import wGDALClose from './wrappers/gdalClose.js';
+import wGDALDatasetGetLayerCount from './wrappers/gdalDatasetGetLayerCount.js';
 import wGDALDEMProcessing from './wrappers/gdalDemProcessing.js';
 import wGDALGetRasterCount from './wrappers/gdalGetRasterCount.js';
 import wGDALGetRasterXSize from './wrappers/gdalGetRasterXSize.js';
@@ -74,7 +75,13 @@ self.Module = {
         // C returns a pointer to a GDALDataset, we need to use 'number'.
         //
         registry.GDALOpen = wGDALOpen(
-            self.Module.cwrap('GDALOpen', 'number', ['string']),
+            self.Module.cwrap('GDALOpenEx', 'number', [
+                'string', // Filename
+                'number', // nOpenFlags
+                'number', // NULL-terminated list of drivers to limit to when opening file
+                'number', // NULL-terminated list of option flags passed to drivers
+                'number', // Paths to sibling files to avoid file system searches
+            ]),
             errorHandling,
             DATASETPATH
         );
@@ -95,6 +102,10 @@ self.Module = {
         );
         registry.GDALGetRasterCount = wGDALGetRasterCount(
             self.Module.cwrap('GDALGetRasterCount', 'number', ['number']),
+            errorHandling
+        );
+        registry.GDALDatasetGetLayerCount = wGDALDatasetGetLayerCount(
+            self.Module.cwrap('GDALDatasetGetLayerCount', 'number', ['number']),
             errorHandling
         );
         registry.GDALGetRasterXSize = wGDALGetRasterXSize(
