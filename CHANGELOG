@@ -1,4 +1,7 @@
 ## UPCOMING
+- Add support for opening vector datasets
+- Add GDALDataset.layerCount() to wrap GDALDatasetGetLayerCount()
+- Add GDALDataset.vectorConvert() to wrap GDALVectorTranslate()
 
 ## 1.1.2 (2022-10-12)
 - Allow users to specify a valid absolute URL when the default URL is invalid
