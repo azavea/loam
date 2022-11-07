@@ -298,6 +298,30 @@ describe('Given that loam exists', () => {
         });
     });
 
+    describe('calling vectorConvert', function () {
+        it('should succeed and return a new Dataset in the new format', function () {
+            return Promise.all([
+                xhrAsPromiseBlob(shpPath),
+                xhrAsPromiseBlob(shxPath),
+                xhrAsPromiseBlob(dbfPath),
+                xhrAsPromiseBlob(prjPath),
+            ])
+                .then(([shpBlob, shxBlob, dbfBlob, prjBlob]) =>
+                    loam.open({ name: 'shp.shp', data: shpBlob }, [
+                        { name: 'shp.shx', data: shxBlob },
+                        { name: 'shp.dbf', data: dbfBlob },
+                        { name: 'shp.prj', data: prjBlob },
+                    ])
+                )
+                .then((ds) => ds.vectorConvert(['-f', 'GeoJSON']))
+                .then((newDs) => newDs.bytes())
+                .then((jsonBytes) => {
+                    const utf8Decoder = new TextDecoder();
+                    expect(utf8Decoder.decode(jsonBytes)).to.include('FeatureCollection');
+                });
+        });
+    });
+
     describe('calling warp', function () {
         it('should succeed and return a new Dataset that has been warped', function () {
             return (

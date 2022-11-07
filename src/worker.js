@@ -14,6 +14,7 @@ import wGDALGetRasterYSize from './wrappers/gdalGetRasterYSize.js';
 import wGDALGetProjectionRef from './wrappers/gdalGetProjectionRef.js';
 import wGDALGetGeoTransform from './wrappers/gdalGetGeoTransform.js';
 import wGDALTranslate from './wrappers/gdalTranslate.js';
+import wGDALVectorTranslate from './wrappers/gdalVectorTranslate.js';
 import wGDALWarp from './wrappers/gdalWarp.js';
 import wReproject from './wrappers/reproject.js';
 
@@ -129,6 +130,19 @@ self.Module = {
                 'string', // Output path
                 'number', // GDALDatasetH source dataset
                 'number', // GDALTranslateOptions *
+                'number', // int * to use for error reporting
+            ]),
+            errorHandling,
+            DATASETPATH
+        );
+        // Equivalent to ogr2ogr
+        registry.GDALVectorTranslate = wGDALVectorTranslate(
+            self.Module.cwrap('GDALVectorTranslate', 'number', [
+                'string', // Output path or NULL
+                'number', // Destination dataset or NULL
+                'number', // Number of input datasets (only 1 is supported)
+                'number', // GDALDatasetH * list of source datasets
+                'number', // GDALVectorTranslateOptions *
                 'number', // int * to use for error reporting
             ]),
             errorHandling,

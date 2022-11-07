@@ -79,6 +79,17 @@ export class GDALDataset {
         });
     }
 
+    vectorConvert(args) {
+        return new Promise((resolve, reject) => {
+            resolve(
+                new GDALDataset(
+                    this.source,
+                    this.operations.concat(new DatasetOperation('GDALVectorTranslate', args))
+                )
+            );
+        });
+    }
+
     warp(args) {
         return new Promise((resolve, reject) => {
             resolve(

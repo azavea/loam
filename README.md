@@ -177,6 +177,17 @@ A promise that resolves to a new `GDALDataset`.
 
 <br />
 
+### `GDALDataset.vectorConvert(args)`
+Converts vector data between different formats. This is the equivalent of the [ogr2ogr](https://gdal.org/programs/ogr2ogr.html) command.
+
+**Note**: This returns a new `GDALDataset` object but does not perform any immediate calculation. Instead, calls to `.vectorConvert()` are evaluated lazily. Each successive call to `.vectorConvert()` is stored in a list of operations on the dataset object. These operations are only evaluated when necessary in order to access some property of the dataset, such as its size, bytes, or layer count.
+#### Parameters
+- `args`: An array of strings, each representing a single command-line argument accepted by the `ogr2ogr` command. The `dst_datasource_name` and `src_datasource_name` parameters should be omitted; these are handled by `GDALDataset`. Example: `ds.vectorConvert(['-f', 'GeoJSON'])`.
+#### Return value
+A promise that resolves to a new `GDALDataset`.
+
+<br />
+
 ### `GDALDataset.warp(args)`
 Image reprojection and warping utility. This is the equivalent of the [gdalwarp](https://gdal.org/programs/gdalwarp.html) command.
 
