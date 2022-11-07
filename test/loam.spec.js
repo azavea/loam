@@ -3,6 +3,10 @@ const tinyTifPath = '/base/test/assets/tiny.tif';
 const tinyDEMPath = '/base/test/assets/tiny_dem.tif';
 const invalidTifPath = 'base/test/assets/not-a-tiff.bytes';
 const geojsonPath = '/base/test/assets/geom.geojson';
+const shpPath = '/base/test/assets/point.shp';
+const shxPath = '/base/test/assets/point.shx';
+const dbfPath = '/base/test/assets/point.dbf';
+const prjPath = '/base/test/assets/point.prj';
 const epsg4326 =
     'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]';
 const epsg3857 =
@@ -108,13 +112,41 @@ describe('Given that loam exists', () => {
     });
 
     describe('calling open with a File', function () {
-        it('should return a GDALDataset');
+        it('should return a GDALDataset', () => {
+            return xhrAsPromiseBlob(tinyTifPath)
+                .then((tifBlob) => new File([tifBlob], 'tinyTif.tif'))
+                .then((tinyTifFile) => loam.open(tinyTifFile))
+                .then((ds) => {
+                    expect(ds).to.be.an.instanceof(loam.GDALDataset);
+                });
+        });
     });
 
     describe('calling open with a vector', function () {
         it('should return a GDALDataset', () => {
             return xhrAsPromiseBlob(geojsonPath)
                 .then((geojsonBlob) => loam.open(geojsonBlob))
+                .then((ds) => {
+                    expect(ds).to.be.an.instanceof(loam.GDALDataset);
+                });
+        });
+    });
+
+    describe('calling open with a multi-file format', function () {
+        it('should return a GDALDataset', () => {
+            return Promise.all([
+                xhrAsPromiseBlob(shpPath),
+                xhrAsPromiseBlob(shxPath),
+                xhrAsPromiseBlob(dbfPath),
+                xhrAsPromiseBlob(prjPath),
+            ])
+                .then(([shpBlob, shxBlob, dbfBlob, prjBlob]) =>
+                    loam.open({ name: 'shp.shp', data: shpBlob }, [
+                        { name: 'shp.shx', data: shxBlob },
+                        { name: 'shp.dbf', data: dbfBlob },
+                        { name: 'shp.prj', data: prjBlob },
+                    ])
+                )
                 .then((ds) => {
                     expect(ds).to.be.an.instanceof(loam.GDALDataset);
                 });
@@ -524,11 +556,7 @@ describe('Given that loam exists', () => {
         });
     });
 
-    // Note that the "raster-only" term here is fairly limited. Many GDAL methods return valid
-    // (though not necessarily meaningful) information on vector datasets even when they're intended
-    // for use on rasters. For example, `GDALGetRasterXSize` and `GDALGetRasterYSize` seem to return
-    // 512 for a GeoJSON file consisting of a single point.
-    describe('calling raster-only methods on a vector dataset', function () {
+    describe('calling render() with a vector dataset', function () {
         it('should fail and return a useful error message', function () {
             return xhrAsPromiseBlob(geojsonPath)
                 .then((geojsonBlob) => loam.open(geojsonBlob))
@@ -536,12 +564,39 @@ describe('Given that loam exists', () => {
                 .then((ds) => ds.bytes())
                 .then(
                     (result) => {
-                        console.log(result);
                         throw new Error(
                             `render() should have failed for a vector dataset but got ${result}`
                         );
                     },
                     (error) => expect(error.message).to.include('Error in GDALDEMProcessing')
+                );
+        });
+    });
+
+    describe('calling convert with a vector dataset', function () {
+        it('should fail because the vector dataset has no raster bands', function () {
+            return Promise.all([
+                xhrAsPromiseBlob(shpPath),
+                xhrAsPromiseBlob(shxPath),
+                xhrAsPromiseBlob(dbfPath),
+                xhrAsPromiseBlob(prjPath),
+            ])
+                .then(([shpBlob, shxBlob, dbfBlob, prjBlob]) =>
+                    loam.open({ name: 'shp.shp', data: shpBlob }, [
+                        { name: 'shp.shx', data: shxBlob },
+                        { name: 'shp.dbf', data: dbfBlob },
+                        { name: 'shp.prj', data: prjBlob },
+                    ])
+                )
+                .then((ds) => ds.convert(['-outsize', '200%', '200%']))
+                .then((newDs) => newDs.width())
+                .then(
+                    (result) => {
+                        throw new Error(
+                            `convert() should have failed for vector dataset but got ${result}`
+                        );
+                    },
+                    (error) => expect(error.message).to.include('Input file has no bands')
                 );
         });
     });

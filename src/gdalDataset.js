@@ -8,6 +8,22 @@ export class DatasetOperation {
     }
 }
 
+// The starting point of a dataset within a GDAL webworker context. Outputs a dataset.
+// - functionName is the name of a GDAL function that can generate a dataset
+//   Currently, this is either GDALOpen or GDALRasterize
+// - file is a File, Blob, or {name: string, data: Blob}
+// - sidecars are any other files that need to get loaded into the worker filesystem alongside file
+//   Must match the type of file
+// - args are any additional arguments that should be passed to functionName.
+export class DatasetSource {
+    constructor(functionName, file, sidecars = [], args = []) {
+        this.func = functionName;
+        this.src = file;
+        this.sidecars = sidecars;
+        this.args = args;
+    }
+}
+
 export class GDALDataset {
     constructor(source, operations) {
         this.source = source;

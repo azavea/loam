@@ -181,7 +181,11 @@ self.Module = {
 
 function handleDatasetAccess(accessor, dataset) {
     // 1: Open the source.
-    let srcDs = registry[dataset.source.func](dataset.source.src, dataset.source.args);
+    let srcDs = registry[dataset.source.func](
+        dataset.source.src,
+        dataset.source.args,
+        dataset.source.sidecars
+    );
 
     let resultDs = srcDs;
 

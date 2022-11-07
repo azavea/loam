@@ -4,7 +4,7 @@ import guessFileExtension from '../guessFileExtension.js';
 import ParamParser from '../stringParamAllocator.js';
 
 export default function (GDALRasterize, errorHandling, rootPath) {
-    return function (geojson, args) {
+    return function (geojson, args = [], sidecars = []) {
         let params = new ParamParser(args);
 
         // Make a temporary file location to hold the geojson

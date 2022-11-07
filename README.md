@@ -65,10 +65,12 @@ A promise that resolves when Loam is initialized. All of the functions described
 
 <br />
 
-### `loam.open(file)`
+### `loam.open(file, sidecars)`
 Creates a new GDAL Dataset.
 #### Parameters
-- `file`: A Blob or File object that should be opened with GDAL. GDAL is compiled with TIFF, PNG, and JPEG support.
+- `file`: A Blob or File object that should be opened with GDAL. GDAL is compiled with TIFF, PNG, and JPEG support. If you have a Blob, you may also control the name of the file that is shown to GDAL on the virtual filesystem by passing an object with the shape `{name: string, data: Blob}`. This can be useful if you are relying on GDAL behavior that uses file extensions to determine formats.
+- `sidecars`: An array of additional files that will be made present in the virtual file system when opening `file`. Some data formats are composed of multiple files (for example, Shapefiles have `.shp`, `.shx`, and `.prj` files, among others). If you need to include multiple files in order to open a dataset, pass the "main" file as `file`, and pass the others to `sidecars`. For a Shapefile, this would mean passing the `.shp` file as `file` and the `.shx`, `.prj`, and friends to `sidecars`. If `file` is a File, then `sidecars` must be an Array\<File>. If `file` is a Blob or Object (see above), then `sidecars` must be an Array\<Object> where each element has the shape `{name: string, data: Blob}`.
+
 #### Return value
 A promise that resolves with an instance of `GDALDataset`.
 
@@ -116,9 +118,16 @@ A promise that resolves immediately with an empty list (for historical reasons).
 <br />
 
 ### `GDALDataset.count()`
-Get the number of bands in the dataset.
+Get the number of raster bands in the dataset.
 #### Return value
-A promise which resolves to the number of bands in the dataset.
+A promise which resolves to the number of raster bands in the dataset.
+
+<br />
+
+### `GDALDataset.layerCount()`
+Get the number of vector layers in the dataset.
+#### Return value
+A promise which resolves to the number of vector layers in the dataset.
 
 <br />
 

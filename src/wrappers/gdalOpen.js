@@ -8,7 +8,7 @@ const GDAL_OF_VERBOSE_ERROR = 0x40;
 
 /* global FS WORKERFS */
 export default function (GDALOpenEx, errorHandling, rootPath) {
-    return function (file) {
+    return function (file, args = [], sidecars = []) {
         let filename;
 
         const directory = rootPath + randomKey();
@@ -17,10 +17,17 @@ export default function (GDALOpenEx, errorHandling, rootPath) {
 
         if (file instanceof File) {
             filename = file.name;
-            FS.mount(WORKERFS, { files: [file] }, directory);
+            FS.mount(WORKERFS, { files: [file, ...sidecars] }, directory);
         } else if (file instanceof Blob) {
             filename = 'dataset';
-            FS.mount(WORKERFS, { blobs: [{ name: filename, data: file }] }, directory);
+            FS.mount(WORKERFS, { blobs: [{ name: filename, data: file }, ...sidecars] }, directory);
+        } else if (file instanceof Object && 'name' in file && 'data' in file) {
+            filename = file.name;
+            FS.mount(
+                WORKERFS,
+                { blobs: [{ name: filename, data: file.data }, ...sidecars] },
+                directory
+            );
         }
         const filePath = directory + '/' + filename;
 
