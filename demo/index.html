@@ -4,14 +4,25 @@
         <title>Loam Test</title>
         <script type="text/javascript" src="/loam.js"></script>
     </head>
+
     <body>
-        <form>
-            <input type="file" id="geotiff-file" />
-        </form>
         <p>
-            Select a GeoTIFF using the Browse... button. Information about the file will be
-            displayed below.
+            Select a file using the Source file input and then click "Display metadata". Metadata
+            about the file will be displayed below. GeoTIFFs work best, but GeoJSON and Shapefiles
+            will work to some extent as well. Make sure to select sidecar files when relevant (e.g.
+            .prj, .dbf, .shx, etc. for Shapefiles).
         </p>
+        <form>
+            <label>
+                Source file:
+                <input type="file" id="source-file" />
+            </label>
+            <label>
+                Additional files:
+                <input type="file" id="sidecar-files" multiple />
+            </label>
+            <button type="button" id="display-metadata-button">Display metadata</button>
+        </form>
 
         <div id="gdalinfo"></div>
         <script src="index.js"></script>

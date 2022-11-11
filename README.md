@@ -65,10 +65,12 @@ A promise that resolves when Loam is initialized. All of the functions described
 
 <br />
 
-### `loam.open(file)`
+### `loam.open(file, sidecars)`
 Creates a new GDAL Dataset.
 #### Parameters
-- `file`: A Blob or File object that should be opened with GDAL. GDAL is compiled with TIFF, PNG, and JPEG support.
+- `file`: A Blob or File object that should be opened with GDAL. GDAL is compiled with TIFF, PNG, and JPEG support. If you have a Blob, you may also control the name of the file that is shown to GDAL on the virtual filesystem by passing an object with the shape `{name: string, data: Blob}`. This can be useful if you are relying on GDAL behavior that uses file extensions to determine formats.
+- `sidecars`: An array of additional files that will be made present in the virtual file system when opening `file`. Some data formats are composed of multiple files (for example, Shapefiles have `.shp`, `.shx`, and `.prj` files, among others). If you need to include multiple files in order to open a dataset, pass the "main" file as `file`, and pass the others to `sidecars`. For a Shapefile, this would mean passing the `.shp` file as `file` and the `.shx`, `.prj`, and friends to `sidecars`. If `file` is a File, then `sidecars` must be an Array\<File>. If `file` is a Blob or Object (see above), then `sidecars` must be an Array\<Object> where each element has the shape `{name: string, data: Blob}`.
+
 #### Return value
 A promise that resolves with an instance of `GDALDataset`.
 
@@ -116,9 +118,16 @@ A promise that resolves immediately with an empty list (for historical reasons).
 <br />
 
 ### `GDALDataset.count()`
-Get the number of bands in the dataset.
+Get the number of raster bands in the dataset.
 #### Return value
-A promise which resolves to the number of bands in the dataset.
+A promise which resolves to the number of raster bands in the dataset.
+
+<br />
+
+### `GDALDataset.layerCount()`
+Get the number of vector layers in the dataset.
+#### Return value
+A promise which resolves to the number of vector layers in the dataset.
 
 <br />
 
@@ -163,6 +172,17 @@ Converts raster data between different formats. This is the equivalent of the [g
 **Note**: This returns a new `GDALDataset` object but does not perform any immediate calculation. Instead, calls to `.convert()` and `.warp()` are evaluated lazily. Each successive call to `.convert()` or `.warp()` is stored in a list of operations on the dataset object. These operations are only evaluated when necessary in order to access some property of the dataset, such as its size, bytes, or band count.
 #### Parameters
 - `args`: An array of strings, each representing a single command-line argument accepted by the `gdal_translate` command. The `src_dataset` and `dst_dataset` parameters should be omitted; these are handled by `GDALDataset`. Example: `ds.convert(['-outsize', '200%', '200%'])`
+#### Return value
+A promise that resolves to a new `GDALDataset`.
+
+<br />
+
+### `GDALDataset.vectorConvert(args)`
+Converts vector data between different formats. This is the equivalent of the [ogr2ogr](https://gdal.org/programs/ogr2ogr.html) command.
+
+**Note**: This returns a new `GDALDataset` object but does not perform any immediate calculation. Instead, calls to `.vectorConvert()` are evaluated lazily. Each successive call to `.vectorConvert()` is stored in a list of operations on the dataset object. These operations are only evaluated when necessary in order to access some property of the dataset, such as its size, bytes, or layer count.
+#### Parameters
+- `args`: An array of strings, each representing a single command-line argument accepted by the `ogr2ogr` command. The `dst_datasource_name` and `src_datasource_name` parameters should be omitted; these are handled by `GDALDataset`. Example: `ds.vectorConvert(['-f', 'GeoJSON'])`.
 #### Return value
 A promise that resolves to a new `GDALDataset`.
 

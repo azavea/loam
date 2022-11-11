@@ -6,6 +6,7 @@
 import wGDALOpen from './wrappers/gdalOpen.js';
 import wGDALRasterize from './wrappers/gdalRasterize.js';
 import wGDALClose from './wrappers/gdalClose.js';
+import wGDALDatasetGetLayerCount from './wrappers/gdalDatasetGetLayerCount.js';
 import wGDALDEMProcessing from './wrappers/gdalDemProcessing.js';
 import wGDALGetRasterCount from './wrappers/gdalGetRasterCount.js';
 import wGDALGetRasterXSize from './wrappers/gdalGetRasterXSize.js';
@@ -13,6 +14,7 @@ import wGDALGetRasterYSize from './wrappers/gdalGetRasterYSize.js';
 import wGDALGetProjectionRef from './wrappers/gdalGetProjectionRef.js';
 import wGDALGetGeoTransform from './wrappers/gdalGetGeoTransform.js';
 import wGDALTranslate from './wrappers/gdalTranslate.js';
+import wGDALVectorTranslate from './wrappers/gdalVectorTranslate.js';
 import wGDALWarp from './wrappers/gdalWarp.js';
 import wReproject from './wrappers/reproject.js';
 
@@ -74,7 +76,13 @@ self.Module = {
         // C returns a pointer to a GDALDataset, we need to use 'number'.
         //
         registry.GDALOpen = wGDALOpen(
-            self.Module.cwrap('GDALOpen', 'number', ['string']),
+            self.Module.cwrap('GDALOpenEx', 'number', [
+                'string', // Filename
+                'number', // nOpenFlags
+                'number', // NULL-terminated list of drivers to limit to when opening file
+                'number', // NULL-terminated list of option flags passed to drivers
+                'number', // Paths to sibling files to avoid file system searches
+            ]),
             errorHandling,
             DATASETPATH
         );
@@ -95,6 +103,10 @@ self.Module = {
         );
         registry.GDALGetRasterCount = wGDALGetRasterCount(
             self.Module.cwrap('GDALGetRasterCount', 'number', ['number']),
+            errorHandling
+        );
+        registry.GDALDatasetGetLayerCount = wGDALDatasetGetLayerCount(
+            self.Module.cwrap('GDALDatasetGetLayerCount', 'number', ['number']),
             errorHandling
         );
         registry.GDALGetRasterXSize = wGDALGetRasterXSize(
@@ -118,6 +130,19 @@ self.Module = {
                 'string', // Output path
                 'number', // GDALDatasetH source dataset
                 'number', // GDALTranslateOptions *
+                'number', // int * to use for error reporting
+            ]),
+            errorHandling,
+            DATASETPATH
+        );
+        // Equivalent to ogr2ogr
+        registry.GDALVectorTranslate = wGDALVectorTranslate(
+            self.Module.cwrap('GDALVectorTranslate', 'number', [
+                'string', // Output path or NULL
+                'number', // Destination dataset or NULL
+                'number', // Number of input datasets (only 1 is supported)
+                'number', // GDALDatasetH * list of source datasets
+                'number', // GDALVectorTranslateOptions *
                 'number', // int * to use for error reporting
             ]),
             errorHandling,
@@ -170,7 +195,11 @@ self.Module = {
 
 function handleDatasetAccess(accessor, dataset) {
     // 1: Open the source.
-    let srcDs = registry[dataset.source.func](dataset.source.src, dataset.source.args);
+    let srcDs = registry[dataset.source.func](
+        dataset.source.src,
+        dataset.source.args,
+        dataset.source.sidecars
+    );
 
     let resultDs = srcDs;
 
