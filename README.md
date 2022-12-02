@@ -159,6 +159,59 @@ A promise which resolves to the affine transform.
 
 <br />
 
+### `GDALDataset.bandMinimum(bandNum)`
+Get the actual minimum value or the minimum possible value of a band (depending on format).
+#### Parameters
+- `bandNum`: The number of the band for which to get the minimum value. Band numbering starts at 1.
+#### Return value
+A promise which resolves to a minimum value for the specified band.
+
+<br />
+
+### `GDALDataset.bandMaximum(bandNum)`
+Get the actual maximum value or the maximum possible value of a band (depending on format).
+#### Parameters
+- `bandNum`: The number of the band for which to get the maximum value. Band numbering starts at 1.
+#### Return value
+A promise which resolves to a maximum value for the specified band.
+
+<br />
+
+### `GDALDataset.bandStatistics(bandNum)`
+Get statistics about the values in a band.
+#### Parameters
+- `bandNum`: The number of the band for which to get statistics. Band numbering starts at 1.
+#### Return value
+A promise which resolves to an object containing statistics. The shape of the object will be:
+```javascript
+{
+  minimum: The calculated minimum value of the band
+  maximum: The calculated minimum value of the band
+  median: The calculated median value of the band
+  stdDev: The calculated standard deviation of the band
+}
+```
+
+<br />
+
+### `GDALDataset.bandNoDataValue(bandNum)`
+Get the value representing "no data" within the band.
+#### Parameters
+- `bandNum`: The number of the band for which to get the no-data value. Band numbering starts at 1.
+#### Return value
+A promise which resolves to the no-data value for the specified band.
+
+<br />
+
+### `GDALDataset.bandDataType(bandNum)`
+Get the data type of the band (Byte, UInt16, Float32, etc.)
+#### Parameters
+- `bandNum`: The number of the band for which to get the data type. Band numbering starts at 1.
+#### Return value
+A promise which resolves to a string containing the name of the data type for the specified band. For example, 'Byte', 'Float32', etc.
+
+<br />
+
 ### `GDALDataset.bytes()`
 Get the on-disk representation of the dataset, as an array of bytes.
 #### Return value

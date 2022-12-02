@@ -11,6 +11,11 @@ import wGDALDEMProcessing from './wrappers/gdalDemProcessing.js';
 import wGDALGetRasterCount from './wrappers/gdalGetRasterCount.js';
 import wGDALGetRasterXSize from './wrappers/gdalGetRasterXSize.js';
 import wGDALGetRasterYSize from './wrappers/gdalGetRasterYSize.js';
+import wGDALGetRasterMinimum from './wrappers/gdalGetRasterMinimum.js';
+import wGDALGetRasterMaximum from './wrappers/gdalGetRasterMaximum.js';
+import wGDALGetRasterNoDataValue from './wrappers/gdalGetRasterNoDataValue.js';
+import wGDALGetRasterDataType from './wrappers/gdalGetRasterDataType.js';
+import wGDALGetRasterStatistics from './wrappers/gdalGetRasterStatistics.js';
 import wGDALGetProjectionRef from './wrappers/gdalGetProjectionRef.js';
 import wGDALGetGeoTransform from './wrappers/gdalGetGeoTransform.js';
 import wGDALTranslate from './wrappers/gdalTranslate.js';
@@ -117,6 +122,26 @@ self.Module = {
             self.Module.cwrap('GDALGetRasterYSize', 'number', ['number']),
             errorHandling
         );
+        registry.GDALGetRasterMinimum = wGDALGetRasterMinimum(
+            self.Module.cwrap('GDALGetRasterMinimum', 'number', ['number']),
+            errorHandling
+        );
+        registry.GDALGetRasterMaximum = wGDALGetRasterMaximum(
+            self.Module.cwrap('GDALGetRasterMaximum', 'number', ['number']),
+            errorHandling
+        );
+        registry.GDALGetRasterNoDataValue = wGDALGetRasterNoDataValue(
+            self.Module.cwrap('GDALGetRasterNoDataValue', 'number', ['number']),
+            errorHandling
+        );
+        registry.GDALGetRasterDataType = wGDALGetRasterDataType(
+            self.Module.cwrap('GDALGetRasterDataType', 'number', ['number']),
+            errorHandling
+        );
+        registry.GDALGetRasterStatistics = wGDALGetRasterStatistics(
+            self.Module.cwrap('GDALGetRasterStatistics', 'number', ['number']),
+            errorHandling
+        );
         registry.GDALGetProjectionRef = wGDALGetProjectionRef(
             self.Module.cwrap('GDALGetProjectionRef', 'string', ['number']),
             errorHandling
@@ -193,7 +218,7 @@ self.Module = {
     },
 };
 
-function handleDatasetAccess(accessor, dataset) {
+function handleDatasetAccess(accessor, dataset, args) {
     // 1: Open the source.
     let srcDs = registry[dataset.source.func](
         dataset.source.src,
@@ -225,7 +250,7 @@ function handleDatasetAccess(accessor, dataset) {
             true
         );
     } else if (accessor) {
-        result = registry[accessor](resultDs.datasetPtr);
+        result = registry[accessor](resultDs.datasetPtr, ...args);
         registry.GDALClose(resultDs.datasetPtr, resultDs.directory, resultDs.filePath, false);
     } else {
         registry.GDALClose(resultDs.datasetPtr, resultDs.directory, resultDs.filePath, false);
@@ -256,7 +281,7 @@ onmessage = function (msg) {
         if ('func' in msg.data && 'args' in msg.data) {
             result = handleFunctionCall(msg.data.func, msg.data.args);
         } else if ('accessor' in msg.data && 'dataset' in msg.data) {
-            result = handleDatasetAccess(msg.data.accessor, msg.data.dataset);
+            result = handleDatasetAccess(msg.data.accessor, msg.data.dataset, msg.data.args);
         } else {
             postMessage({
                 success: false,

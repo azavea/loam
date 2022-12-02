@@ -229,6 +229,80 @@ describe('Given that loam exists', () => {
         });
     });
 
+    describe('calling bandMinimum()', function () {
+        it('should return the minimum possible value of the raster band', () => {
+            return xhrAsPromiseBlob(tinyTifPath)
+                .then((tifBlob) => loam.open(tifBlob))
+                .then((ds) => ds.bandMinimum(1))
+                .then((min) => expect(min).to.equal(0));
+        });
+    });
+
+    describe('calling bandMaximum()', function () {
+        it('should return the maximum possible value of the raster band', () => {
+            return xhrAsPromiseBlob(tinyTifPath)
+                .then((tifBlob) => loam.open(tifBlob))
+                .then((ds) => ds.bandMaximum(1))
+                .then((max) => expect(max).to.equal(255)); // Determined with gdalinfo
+        });
+    });
+
+    describe('calling bandStatistics()', function () {
+        it('should return the statistics for the raster band', () => {
+            return xhrAsPromiseBlob(tinyTifPath)
+                .then((tifBlob) => loam.open(tifBlob))
+                .then((ds) => ds.bandStatistics(1))
+                .then((stats) => {
+                    expect(stats.minimum).to.equal(15);
+                    expect(stats.maximum).to.equal(255);
+                    expect(stats.median).to.be.approximately(246.52, 0.01);
+                    expect(stats.stdDev).to.be.approximately(39.941, 0.01);
+                });
+        });
+    });
+
+    describe('calling bandNoDataValue()', function () {
+        it('should return the no-data value of the raster band', () => {
+            return xhrAsPromiseBlob(tinyTifPath)
+                .then((tifBlob) => loam.open(tifBlob))
+                .then((ds) => ds.bandNoDataValue(1))
+                .then((ndValue) => expect(ndValue).to.equal(0)); // Determined with gdalinfo
+        });
+    });
+
+    describe('calling bandDataType()', function () {
+        it('should return the data type of the raster band for all band types', () => {
+            const validDataTypes = [
+                'Byte',
+                'UInt16',
+                'Int16',
+                'UInt32',
+                'Int32',
+                'Float32',
+                'Float64',
+                'CInt16',
+                'CInt32',
+                'CFloat32',
+                'CFloat64',
+            ];
+            return (
+                xhrAsPromiseBlob(tinyTifPath)
+                    .then((tifBlob) => loam.open(tifBlob))
+                    // Create an array of datasources that each has been converted to one of the different
+                    // valid data types using gdal_translate
+                    .then((ds) => Promise.all(validDataTypes.map((dt) => ds.convert(['-ot', dt]))))
+                    // Then pull the data types back out of the converted datasources...
+                    .then((everyDataTypeDataset) =>
+                        Promise.all(everyDataTypeDataset.map((dtDs) => dtDs.bandDataType(1)))
+                    )
+                    // ...and expect that we get the same set of data types as we put in.
+                    .then((everyDataTypeResult) =>
+                        expect(everyDataTypeResult).to.deep.equal(validDataTypes)
+                    )
+            );
+        });
+    });
+
     describe('calling wkt()', function () {
         it("should return the GeoTiff's WKT CRS string", () => {
             return xhrAsPromiseBlob(tinyTifPath)
@@ -394,6 +468,20 @@ describe('Given that loam exists', () => {
                         expect(error.message).to.include(
                             'not recognized as a supported file format'
                         )
+                );
+        });
+    });
+
+    describe('calling bandDataType() with incorrect band number', function () {
+        it('should fail and return an error message', function () {
+            return xhrAsPromiseBlob(tinyTifPath)
+                .then((tinyTif) => loam.open(tinyTif))
+                .then((ds) => ds.bandDataType(2))
+                .then(
+                    () => {
+                        throw new Error('bandDataType promise should have been rejected');
+                    },
+                    (error) => expect(error.message).to.include("Pointer 'hBand' is NULL")
                 );
         });
     });
