@@ -58,6 +58,15 @@ function displayInfo() {
                         ')\n';
                 });
             });
+
+            if (count > 0) {
+                ds.bandStatistics(1).then((stats) => {
+                    displayElem.innerText += 'Band 1 min: ' + stats.minimum + '\n';
+                    displayElem.innerText += 'Band 1 max: ' + stats.maximum + '\n';
+                    displayElem.innerText += 'Band 1 median: ' + stats.median + '\n';
+                    displayElem.innerText += 'Band 1 standard deviation: ' + stats.stdDev + '\n';
+                });
+            }
         });
     });
 }
