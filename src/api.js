@@ -1,9 +1,9 @@
 import { initWorker, clearWorker, runOnWorker } from './workerCommunication.js';
-import { GDALDataset } from './gdalDataset.js';
+import { DatasetSource, GDALDataset } from './gdalDataset.js';
 
-function open(file) {
+function open(file, sidecars = []) {
     return new Promise((resolve, reject) => {
-        const ds = new GDALDataset({ func: 'GDALOpen', src: file, args: [] });
+        const ds = new GDALDataset(new DatasetSource('GDALOpen', file, sidecars));
 
         return ds.open().then(
             () => resolve(ds),
@@ -14,7 +14,7 @@ function open(file) {
 
 function rasterize(geojson, args) {
     return new Promise((resolve, reject) => {
-        resolve(new GDALDataset({ func: 'GDALRasterize', src: geojson, args: args }));
+        resolve(new GDALDataset(new DatasetSource('GDALRasterize', geojson, [], args)));
     });
 }
 

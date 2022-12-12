@@ -172,8 +172,8 @@ function workerTaskPromise(options) {
 }
 
 // Accessors is a list of accessors operations to run on the dataset defined by dataset.
-function accessFromDataset(accessor, dataset) {
-    return workerTaskPromise({ accessor: accessor, dataset: dataset });
+function accessFromDataset(accessor, dataset, ...otherArgs) {
+    return workerTaskPromise({ accessor: accessor, dataset: dataset, args: otherArgs });
 }
 
 // Run a single function on the worker.

@@ -28,6 +28,7 @@ export default function (GDALTranslate, errorHandling, rootPath) {
             optionsErrType === errorHandling.CPLErr.CEFailure ||
             optionsErrType === errorHandling.CPLErr.CEFatal
         ) {
+            Module.ccall('GDALTranslateOptionsFree', null, ['number'], [translateOptionsPtr]);
             params.deallocate();
             const message = errorHandling.CPLGetLastErrorMsg();
 
