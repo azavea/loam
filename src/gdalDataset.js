@@ -68,6 +68,26 @@ export class GDALDataset {
         return accessFromDataset('GDALGetGeoTransform', this);
     }
 
+    bandMinimum(bandNum) {
+        return accessFromDataset('GDALGetRasterMinimum', this, bandNum);
+    }
+
+    bandMaximum(bandNum) {
+        return accessFromDataset('GDALGetRasterMaximum', this, bandNum);
+    }
+
+    bandStatistics(bandNum) {
+        return accessFromDataset('GDALGetRasterStatistics', this, bandNum);
+    }
+
+    bandDataType(bandNum) {
+        return accessFromDataset('GDALGetRasterDataType', this, bandNum);
+    }
+
+    bandNoDataValue(bandNum) {
+        return accessFromDataset('GDALGetRasterNoDataValue', this, bandNum);
+    }
+
     convert(args) {
         return new Promise((resolve, reject) => {
             resolve(
