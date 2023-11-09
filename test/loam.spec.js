@@ -7,6 +7,7 @@ const shpPath = '/base/test/assets/point.shp';
 const shxPath = '/base/test/assets/point.shx';
 const dbfPath = '/base/test/assets/point.dbf';
 const prjPath = '/base/test/assets/point.prj';
+const jpegPath = '/base/test/assets/tiny.jpg';
 const epsg4326 =
     'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]';
 const epsg3857 =
@@ -116,6 +117,17 @@ describe('Given that loam exists', () => {
             return xhrAsPromiseBlob(tinyTifPath)
                 .then((tifBlob) => new File([tifBlob], 'tinyTif.tif'))
                 .then((tinyTifFile) => loam.open(tinyTifFile))
+                .then((ds) => {
+                    expect(ds).to.be.an.instanceof(loam.GDALDataset);
+                });
+        });
+    });
+
+    describe('calling open with a JPEG File', function () {
+        it('should return a GDALDataset', () => {
+            return xhrAsPromiseBlob(jpegPath)
+                .then((jpegBlob) => new File([jpegBlob], 'tiny.jpg'))
+                .then((jpegFile) => loam.open(jpegFile))
                 .then((ds) => {
                     expect(ds).to.be.an.instanceof(loam.GDALDataset);
                 });
